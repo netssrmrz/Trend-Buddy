@@ -1,0 +1,44 @@
+﻿<script type="text/javascript">
+  tb.query =
+  {
+    table_name: "query",
+
+    Query: function ()
+    {
+      this.id = null;
+      this.title = null;
+      this.terms = null;
+    },
+
+    Select_Ids: function (db, on_success_fn)
+    {
+
+    },
+
+    Select: function (db, on_success_fn)
+    {
+      tb.data.Select_Objs(db, "/" + this.table_name, on_success_fn);
+    },
+
+    Select_Obj: function (db, id, on_success_fn)
+    {
+      tb.data.Select_Obj(db, "/" + this.table_name + "/" + id, on_success_fn);
+    },
+
+    Insert: function (db, obj, on_success_fn)
+    {
+      obj.id = db.conn.ref("/" + this.table_name).push().key;
+      db.conn.ref("/" + this.table_name + "/" + obj.id).set(obj, on_success_fn);
+    },
+
+    Update: function (db, obj, on_success_fn)
+    {
+
+    },
+
+    Delete: function (db, id, on_success_fn)
+    {
+
+    }
+  };
+</script>

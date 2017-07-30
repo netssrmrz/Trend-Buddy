@@ -1,0 +1,101 @@
+﻿<script type="text/javascript">
+  tb.trend =
+  {
+    table_name: "trend",
+
+    Trend: function ()
+    {
+      this.id = null;
+      this.query_id = null;
+      this.datetime = null;
+      this.count = null;
+    },
+
+    Select_By_Query_Id: function (db, query_id, on_success_fn)
+    {
+      db.conn.ref("/" + this.table_name).orderByChild("query_id").equalTo(query_id).once("value", OK_Fn);
+      function OK_Fn(query_res)
+      {
+        tb.data.To_Array(query_res, on_success_fn);
+      }
+    },
+
+    Select_Chart_Vals_By_Query_Id: function (db, query_id, on_success_fn)
+    {
+      tb.trend.Select_By_Query_Id(db, query_id, Select_OK);
+      function Select_OK(items)
+      {
+        var c, datetime, item_vals, item, vals=null;
+
+
+        if (!tb.Empty(items))
+        {
+          vals = [];
+          vals.push(['Date', 'Jobs']);
+          for (c = 0; c < items.length; c++)
+          {
+            item = items[c];
+            item_vals = [new Date(item.datetime), item.count];
+            vals.push(item_vals);
+          }
+        }
+
+        if (on_success_fn!=null)
+          on_success_fn(vals);
+      }
+    },
+
+    Insert: function (db, obj, on_success_fn)
+    {
+      obj.id = db.conn.ref("/" + this.table_name).push().key;
+      db.conn.ref("/" + this.table_name + "/" + obj.id).set(obj, on_success_fn);
+    },
+
+    Insert_From_Query: function (db, query, on_success_fn)
+    {
+      tb.indeed.Get_Job_Count(query.terms, Get_Job_Count_OK);
+      function Get_Job_Count_OK(count)
+      {
+        var trend;
+
+        trend =
+        {
+          query_id: query.id,
+          datetime: Date.now(),
+          count: count
+        };
+        tb.trend.Insert(db, trend, on_success_fn);
+      }
+    },
+
+    Insert_From_Queries: function (db, on_success_fn)
+    {
+      tb.data.Select_Objs(db, '/query', Select_Objs_OK);
+      function Select_Objs_OK(queries)
+      {
+        var todo = queries.length;
+
+        for (c = 0; c < queries.length; c++)
+        {
+          tb.trend.Insert_From_Query(db, queries[c], Insert_From_Query_OK);
+          function Insert_From_Query_OK()
+          {
+            todo--;
+            if (todo == 0 && on_success_fn != null)
+              on_success_fn();
+          }
+        }
+      }
+    },
+
+    Update: function (db, obj, on_success_fn)
+    {
+
+    },
+
+    Delete: function (db, id, on_success_fn)
+    {
+
+    }
+  };
+</script>

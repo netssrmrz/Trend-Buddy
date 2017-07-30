@@ -3,6 +3,11 @@
 <head>
   <title>Trend Buddy</title>
 
+  <script src="https://www.gstatic.com/firebasejs/3.6.4/firebase.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/3.6.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/3.6.2/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/3.6.2/firebase-database.js"></script>
+
   <script src="/pl-elements/webcomponentsjs/webcomponents-lite.min.js"></script>
   <link rel="import" href="/pl-elements/polymer/polymer.html">
   <link rel="import" href="/pl-elements/paper-drawer-panel/paper-drawer-panel.html">
@@ -10,6 +15,13 @@
   <link rel="import" href="/pl-elements/paper-toolbar/paper-toolbar.html">
   <link rel="import" href="/pl-elements/paper-icon-button/paper-icon-button.html">
   <link rel="import" href="/pl-elements/iron-icons/iron-icons.html">
+  <link rel="import" href="/pl-elements/paper-toast/paper-toast.html">
+
+  <link rel="import" href="/tb/init.html">
+  <link rel="import" href="/tb/data.html">
+  <link rel="import" href="/tb/trend.html">
+  <link rel="import" href="/tb/query.html">
+  <link rel="import" href="/tb/indeed.html">
 
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
@@ -23,56 +35,114 @@
       font-family: roboto;
     }
 
-    #menu_items {
+    .menu_items {
       margin: 30px 0px 30px 0px;
     }
 
-    #menu_items iron-icon {
+    .menu_items iron-icon {
       color: #616161;
       margin-right: 20px;
       vertical-align: text-bottom;
     }
 
-    #menu_items a:hover iron-icon {
+    .menu_items a:hover iron-icon {
       color: #00cc00;
     }
 
-    #menu_items a {
+    .menu_items a {
       font-weight: 500;
       display: block;
       padding: 15px 30px 15px 30px;
     }
 
-    #menu_items a:hover {
+    .menu_items a:hover {
       background-color: #f5f5f5;
       color: #00cc00;
       cursor: pointer;
     }
+
+    #curve_chart {
+      xborder: 5px solid #f00;
+      height: 570px;
+    }
   </style>
 
   <script type="text/javascript">
-      google.charts.load('current', {'packages':['corechart']});
-      google.charts.setOnLoadCallback(drawChart);
+    var db;
 
-      function drawChart() {
-        var data = google.visualization.arrayToDataTable([
-          ['Year', 'Sales', 'Expenses'],
-          ['2004',  1000,      400],
-          ['2005',  1170,      460],
-          ['2006',  660,       1120],
-          ['2007',  1030,      540]
-        ]);
+    function Main()
+    {
+      db = new tb.data.Db();
 
-        var options = {
-          title: 'Company Performance',
-          curveType: 'function',
-          legend: { position: 'bottom' }
-        };
+      List_Query_Items();
+      Init_Chart();
+    }
 
-        var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+    function Init_Chart() 
+    {
+      var chart_elem;
 
-        chart.draw(data, options);
+      chart_elem = document.getElementById('curve_chart');
+
+      google.charts.load('current', { 'packages': ['corechart'] });
+      google.charts.setOnLoadCallback(Load_OK);
+      function Load_OK()
+      {
+        var chart;
+
+        chart = new google.visualization.LineChart(chart_elem);
+        chart_elem.chart = chart;
       }
+    }
+
+    function List_Query_Items()
+    {
+      tb.query.Select(db, Select_OK);
+      function Select_OK(queries)
+      {
+        var c, list_elem;
+
+        list_elem = document.getElementById("query_items");
+
+        for (c = 0; c < queries.length; c++)
+        {
+          var item_elem, query;
+
+          query = queries[c];
+          item_elem = document.createElement("a");
+          item_elem.text = query.title;
+          item_elem.query = query;
+          item_elem.onclick = On_Show_Chart;
+
+          list_elem.appendChild(item_elem);
+        }
+      }
+    }
+
+    function Draw_Chart_By_Query_Id(id)
+    {
+      tb.trend.Select_Chart_Vals_By_Query_Id(db, id, Select_OK);
+      function Select_OK(data_vals)
+      {
+        var data_table, options;
+
+        if (tb.Empty(data_vals))
+          alert("No Data");
+        else
+        {
+          data_table = google.visualization.arrayToDataTable(data_vals);
+          options = { title: 'Polymer', curveType: 'line', chartArea: { width: "80%", height: "80%" } };
+          //options = { title: 'Polymer', curveType: 'line' };
+          document.getElementById("curve_chart").chart.draw(data_table, options);
+        }
+      }
+    }
+
+    function On_Show_Chart()
+    {
+      Draw_Chart_By_Query_Id(this.query.id);
+    }
+
   </script>
 </head>
 
@@ -86,11 +156,9 @@
         <div>Trend Buddy</div>
       </paper-toolbar>
 
-      <div id="menu_items">
-        <a id="angular_option">Angular</a>
-        <a id="mvc_option">MVC</a>
-        <a id="ef_option">Entity Framework</a>
+      <div id="query_items" class="menu_items">
       </div>
+
     </paper-header-panel>
 
     <paper-header-panel main>
@@ -99,7 +167,7 @@
         <paper-icon-button icon="menu" paper-drawer-toggle></paper-icon-button>
       </paper-toolbar>
 
-      <div id="curve_chart" style="width: 900px; height: 500px"></div>
+      <div id="curve_chart"></div>
 
     </paper-header-panel>
   </paper-drawer-panel>

@@ -1,0 +1,75 @@
+﻿<script type="text/javascript">
+  tb.data =
+  {
+    Db: function ()
+    {
+      var config;
+
+      config =
+        {
+          apiKey: "AIzaSyAITTb3Fxh1HiyFxdObmgZ2LqJZm38EQ5k",
+          authDomain: "trend-buddy.firebaseapp.com",
+          databaseURL: "https://trend-buddy.firebaseio.com",
+          storageBucket: "trend-buddy.appspot.com",
+          messagingSenderId: "603649293586"
+        };
+      firebase.initializeApp(config);
+      this.conn = firebase.database();
+    },
+
+    Select_Obj: function (db, path, on_success_fn)
+    {
+      db.conn.ref(path).once('value').then(Then_OK);
+      function Then_OK(query_res)
+      {
+        if (on_success_fn != null)
+          on_success_fn(tb.data.To_Obj(query_res));
+      }
+    },
+
+    Select_Objs: function (db, path, on_success_fn)
+    {
+      db.conn.ref(path).once('value').then(Then_OK);
+      function Then_OK(query_res)
+      {
+        tb.data.To_Array(query_res, on_success_fn);
+      }
+    },
+
+    To_Obj: function (query_res)
+    {
+      return query_res.val();
+    },
+
+    To_Array: function (query_res, success_fn)
+    {
+      var val, vals = null, keys, c;
+
+      val = query_res.val();
+      if (val != null)
+      {
+        if (val.constructor === Array)
+          vals = val;
+        else
+        {
+          vals = new Array();
+          keys = Object.keys(val);
+          for (c = 0; c < keys.length; c++)
+          {
+            vals.push(val[keys[c]]);
+          }
+        }
+      }
+
+      if (success_fn != null)
+        success_fn(vals);
+      else
+        return vals;
+    },
+
+    Get_Table: function (obj)
+    {
+      return obj.constructor.name.toLowerCase();
+    },
+  };
+</script>

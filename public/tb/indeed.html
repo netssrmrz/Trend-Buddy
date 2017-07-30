@@ -1,0 +1,30 @@
+﻿<script type="text/javascript">
+
+  tb.indeed =
+  {
+    Get_Job_Count: function (query, success_fn)
+    {
+      var url;
+
+      url = "http://trend-buddy.appspot.com/ads/apisearch?" +
+        "publisher=6433637473123845&" +
+        "q=" + query + "&" +
+        "limit=0&" +
+        "userip=1.2.3.4&" +
+        "useragent=Mozilla/%2F4.0%28Firefox%29&" +
+        "v=2&" +
+        "format=json";
+      tb.Req_Json(url, Req_Json_OK);
+      function Req_Json_OK(res)
+      {
+        var count = 0;
+
+        if (res != null)
+          count = res.totalResults;
+        if (success_fn != null)
+          success_fn(count);
+      }
+    },
+  };
+
+  </script>
