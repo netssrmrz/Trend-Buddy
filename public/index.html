@@ -62,7 +62,6 @@
     }
 
     #curve_chart {
-      xborder: 5px solid #f00;
       height: 570px;
     }
   </style>
@@ -119,28 +118,36 @@
       }
     }
 
-    function Draw_Chart_By_Query_Id(id)
+    function Draw_Chart_By_Query_Id(db, id)
     {
-      tb.trend.Select_Chart_Vals_By_Query_Id(db, id, Select_OK);
-      function Select_OK(data_vals)
+      tb.query.Select_Obj(db, id, Select_Obj_OK);
+      function Select_Obj_OK(query)
       {
-        var data_table, options;
-
-        if (tb.Empty(data_vals))
-          alert("No Data");
-        else
+        tb.trend.Select_Chart_Vals_By_Query_Id(db, id, Select_OK);
+        function Select_OK(data_vals)
         {
-          data_table = google.visualization.arrayToDataTable(data_vals);
-          options = { title: 'Polymer', curveType: 'line', chartArea: { width: "80%", height: "80%" } };
-          //options = { title: 'Polymer', curveType: 'line' };
-          document.getElementById("curve_chart").chart.draw(data_table, options);
+          var data_table, options;
+
+          if (tb.Empty(data_vals))
+            alert("No Data");
+          else
+          {
+            data_table = google.visualization.arrayToDataTable(data_vals);
+            options = {
+              title: query.title,
+              curveType: 'line',
+              chartArea: { width: "80%", height: "80%" },
+              legend: { position: "none" }
+            };
+            document.getElementById("curve_chart").chart.draw(data_table, options);
+          }
         }
       }
     }
 
     function On_Show_Chart()
     {
-      Draw_Chart_By_Query_Id(this.query.id);
+      Draw_Chart_By_Query_Id(db, this.query.id);
     }
 
   </script>
