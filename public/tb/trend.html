@@ -95,7 +95,7 @@
 
     Delete: function (db, id, on_success_fn)
     {
-
-    }
+      db.conn.ref("/" + this.table_name + "/" + id).remove(on_success_fn);
+    },
   };
 </script>

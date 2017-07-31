@@ -33,12 +33,49 @@
 
     Update: function (db, obj, on_success_fn)
     {
+      db.conn.ref("/" + this.table_name + "/" + obj.id).set(obj, on_success_fn);
+    },
 
+    Save: function (db, obj, on_success_fn)
+    {
+      if (obj.id != null)
+        this.Update(db, obj, on_success_fn);
+      else
+        this.Insert(db, obj, on_success_fn);
     },
 
     Delete: function (db, id, on_success_fn)
     {
+      db.conn.ref("/" + this.table_name + "/" + id).remove(Remove_OK);
+      function Remove_OK()
+      {
+        tb.query.Delete_Trend_Data(db, id, on_success_fn);
+      }
+    },
 
+    Delete_Trend_Data: function (db, query_id, on_success_fn)
+    {
+      tb.trend.Select_By_Query_Id(db, query_id, Select_OK);
+      function Select_OK(items)
+      {
+        var c, todo, item;
+
+        if (!tb.Empty(items))
+        {
+          todo = items.length;
+          for (c = 0; c < items.length; c++)
+          {
+            item = items[c];
+            tb.trend.Delete(db, item.id, Delete_OK);
+            function Delete_OK()
+            {
+              todo--;
+              if (todo == 0 && on_success_fn != null)
+                on_success_fn();
+            }
+          }
+        }
+      }
     }
   };
 </script>

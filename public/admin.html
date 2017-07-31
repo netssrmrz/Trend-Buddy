@@ -13,12 +13,9 @@
   <link rel="import" href="/pl-elements/paper-drawer-panel/paper-drawer-panel.html">
   <link rel="import" href="/pl-elements/paper-header-panel/paper-header-panel.html">
   <link rel="import" href="/pl-elements/paper-toolbar/paper-toolbar.html">
-  <link rel="import" href="/pl-elements/paper-icon-button/paper-icon-button.html">
   <link rel="import" href="/pl-elements/iron-icons/iron-icons.html">
   <link rel="import" href="/pl-elements/paper-toast/paper-toast.html">
-  <link rel="import" href="/pl-elements/paper-input/paper-input.html">
-  <link rel="import" href="/pl-elements/paper-button/paper-button.html">
-  <link rel="import" href="/pl-elements/paper-fab/paper-fab.html">
+  <link rel="import" href="/tb-elements/query-editor.html">
 
   <link rel="import" href="/tb/init.html">
   <link rel="import" href="/tb/data.html">
@@ -39,7 +36,7 @@
     }
 
     .menu_items {
-      margin: 30px 0px 30px 0px;
+      margin: 0px 20px 0px 20px;
     }
 
     .menu_items iron-icon {
@@ -55,13 +52,21 @@
     .menu_items a {
       font-weight: 500;
       display: block;
-      padding: 15px 30px 15px 30px;
+      padding: 15px 10px 15px 10px;
     }
 
     .menu_items a:hover {
       background-color: #f5f5f5;
       color: #00cc00;
       cursor: pointer;
+    }
+
+    #query_form{
+      padding: 20px;
+    }
+
+    #query_items {
+      border-top: 2px solid #eee;
     }
   </style>
 
@@ -71,10 +76,33 @@
     function Main()
     {
       db = new tb.data.Db();
+
+      document.getElementById("add_option").onclick = On_Add_Query;
       document.getElementById("upd_option").onclick = On_Update_All;
-      document.getElementById("bld_option").onclick = On_Build_Queries;
+
+      document.getElementById("qry_edt").on_save_fn = On_Save_Query;
+      document.getElementById("qry_edt").on_clr_data_fn = On_Clear_Data;
+      document.getElementById("qry_edt").on_del_fn = On_Del_Query;
 
       List_Query_Items();
+    }
+
+    function On_Del_Query(query_id)
+    {
+      tb.query.Delete(db, query_id, Delete_OK);
+      function Delete_OK()
+      {
+        document.getElementById("del_ok").show();
+      }
+    }
+
+    function On_Clear_Data(query_id)
+    {
+      tb.query.Delete_Trend_Data(db, query_id, Delete_Trend_Data_OK);
+      function Delete_Trend_Data_OK()
+      {
+        document.getElementById("trend_del_ok").show();
+      }
     }
 
     function List_Query_Items()
@@ -91,30 +119,60 @@
           var item_elem, query;
 
           query = queries[c];
-          item_elem = document.createElement("a");
-          item_elem.text = query.title;
-          item_elem.query = query;
-          //item_elem.onclick = On_Show_Chart;
-
-          list_elem.appendChild(item_elem);
+          Insert_Query_Item(list_elem, query);
         }
       }
     }
 
-    function On_Build_Queries()
+    function On_Add_Query()
     {
-      var query;
+      document.getElementById("qry_edt").item_elem = null;
+      document.getElementById("qry_edt").Add();
+    }
 
-      query =
+    function On_Edit_Query()
+    {
+      document.getElementById("qry_edt").item_elem = this;
+
+      tb.query.Select_Obj(db, this.query.id, Select_Obj_OK);
+      function Select_Obj_OK(query)
       {
-        terms: "java",
-        title: "Java"
-      };
-      tb.query.Insert(db, query, Insert_OK);
-      function Insert_OK()
+        document.getElementById("qry_edt").Edit(query);
+      }
+    }
+
+    function On_Save_Query(query)
+    {
+      var t = this;
+
+      tb.query.Save(db, query, Update_OK);
+      function Update_OK()
       {
+        // delete trend data
+        if (t.item_elem!=null)
+          Update_Query_Item(t.item_elem, query);
+        else
+          Insert_Query_Item(document.getElementById("query_items"), query);
+
         document.getElementById("qry_ok").show();
       }
+    }
+
+    function Insert_Query_Item(list_elem, query)
+    {
+      var item_elem;
+
+      item_elem = document.createElement("a");
+      Update_Query_Item(item_elem, query)
+      item_elem.onclick = On_Edit_Query;
+
+      list_elem.appendChild(item_elem);
+    }
+
+    function Update_Query_Item(item_elem, query)
+    {
+      item_elem.text = query.title;
+      item_elem.query = query;
     }
 
     function On_Update_All()
@@ -139,12 +197,12 @@
         <div>Trend Buddy</div>
       </paper-toolbar>
 
-      <div id="query_items" class="menu_items">
+      <div class="menu_items">
+        <a id="add_option">Add Query</a>
+        <a id="upd_option">Update All</a>
       </div>
 
-      <div class="menu_items">
-        <a id="bld_option">Build Queries</a>
-        <a id="upd_option">Update All</a>
+      <div id="query_items" class="menu_items">
       </div>
 
     </paper-header-panel>
@@ -155,17 +213,16 @@
         <paper-icon-button icon="menu" paper-drawer-toggle></paper-icon-button>
       </paper-toolbar>
 
-      <paper-input label="Title"></paper-input>
-      <paper-input label="Search Terms"></paper-input>
-      <paper-button>Save</paper-button>
-      <paper-button>Delete</paper-button>
-      <paper-fab icon="add" title="Add Search Query"></paper-fab>
+      <query-editor id="qry_edt"></query-editor>
 
     </paper-header-panel>
+
   </paper-drawer-panel>
 
   <paper-toast id="msg_ok" text="All trends updated."></paper-toast>
   <paper-toast id="qry_ok" text="Query updated."></paper-toast>
+  <paper-toast id="trend_del_ok" text="All trend data deleted."></paper-toast>
+  <paper-toast id="del_ok" text="Query deleted."></paper-toast>
 
 </body>
 
