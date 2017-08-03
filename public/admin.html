@@ -35,27 +35,27 @@
       font-family: roboto;
     }
 
-    .menu_items {
+    #menu_items {
       margin: 0px 20px 0px 20px;
     }
 
-    .menu_items iron-icon {
+    #menu_items iron-icon {
       color: #616161;
       margin-right: 20px;
       vertical-align: text-bottom;
     }
 
-    .menu_items a:hover iron-icon {
+    #menu_items a:hover iron-icon {
       color: #00cc00;
     }
 
-    .menu_items a {
+    #menu_items a {
       font-weight: 500;
       display: block;
       padding: 15px 10px 15px 10px;
     }
 
-    .menu_items a:hover {
+    #menu_items a:hover {
       background-color: #f5f5f5;
       color: #00cc00;
       cursor: pointer;
@@ -67,6 +67,20 @@
 
     #query_items {
       border-top: 2px solid #eee;
+      margin: 0px 20px 0px 20px;
+    }
+
+    #query_items a {
+      font-weight: 500;
+      font-size: 14px;
+      display: block;
+      padding: 10px 10px 10px 10px;
+    }
+
+    #query_items a:hover {
+      background-color: #f5f5f5;
+      color: #00cc00;
+      cursor: pointer;
     }
   </style>
 
@@ -79,12 +93,47 @@
 
       document.getElementById("add_option").onclick = On_Add_Query;
       document.getElementById("upd_option").onclick = On_Update_All;
+      document.getElementById("idx_option").onclick = On_Reindex;
 
       document.getElementById("qry_edt").on_save_fn = On_Save_Query;
       document.getElementById("qry_edt").on_clr_data_fn = On_Clear_Data;
       document.getElementById("qry_edt").on_del_fn = On_Del_Query;
 
       List_Query_Items();
+    }
+
+    function On_Reindex()
+    {
+      tb.query.Select(db, Select_OK);
+      function Select_OK(queries)
+      {
+        var c, query;
+
+        for (c = 0; c < queries.length; c++)
+        {
+          query = queries[c];
+          Del_OK.query = query;
+          db.conn.ref("/query-trend/" + query.id).remove(Del_OK);
+          function Del_OK()
+          {
+            var query = Del_OK.query;
+
+            tb.trend.Select_By_Query_Id(db, query.id, Select_OK);
+            function Select_OK(entries)
+            {
+              var c, entry;
+
+              for (c = 0; c<entries.length; c++)
+              {
+                entry = entries[c];
+                db.conn.ref("/query-trend/" + query.id + "/" + entry.id).set(entry.datetime);
+              }
+              document.getElementById("msg").text = "Query \"" + query.title + "\" completed.";
+              document.getElementById("msg").show();
+            }
+          }
+        }
+      }
     }
 
     function On_Del_Query(query_id)
@@ -197,12 +246,13 @@
         <div>Trend Buddy</div>
       </paper-toolbar>
 
-      <div class="menu_items">
+      <div id="menu_items">
         <a id="add_option">Add Query</a>
         <a id="upd_option">Update All</a>
+        <a id="idx_option">Index</a>
       </div>
 
-      <div id="query_items" class="menu_items">
+      <div id="query_items">
       </div>
 
     </paper-header-panel>
@@ -223,6 +273,7 @@
   <paper-toast id="qry_ok" text="Query updated."></paper-toast>
   <paper-toast id="trend_del_ok" text="All trend data deleted."></paper-toast>
   <paper-toast id="del_ok" text="Query deleted."></paper-toast>
+  <paper-toast id="msg"></paper-toast>
 
 </body>
 
