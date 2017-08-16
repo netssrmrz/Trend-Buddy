@@ -6,15 +6,52 @@
       var config;
 
       config =
-        {
-          apiKey: "AIzaSyAITTb3Fxh1HiyFxdObmgZ2LqJZm38EQ5k",
-          authDomain: "trend-buddy.firebaseapp.com",
-          databaseURL: "https://trend-buddy.firebaseio.com",
-          storageBucket: "trend-buddy.appspot.com",
-          messagingSenderId: "603649293586"
-        };
+      {
+        apiKey: "AIzaSyAITTb3Fxh1HiyFxdObmgZ2LqJZm38EQ5k",
+        authDomain: "trend-buddy.firebaseapp.com",
+        databaseURL: "https://trend-buddy.firebaseio.com",
+        storageBucket: "trend-buddy.appspot.com",
+        messagingSenderId: "603649293586"
+      };
       firebase.initializeApp(config);
       this.conn = firebase.database();
+
+      this.cache = [];
+
+      this.Exists_In_Cache = function (key)
+      {
+        var res = false;
+
+        if (this.cache[key] != null)
+          res = true;
+
+        return res;
+      };
+
+      this.Get_From_Cache = function (key)
+      {
+        return this.cache[key];
+      };
+
+      this.Insert_In_Cache = function (key, val)
+      {
+        this.cache[key] = val;
+      };
+
+      this.If_Not_In_Cache = function (key, get_val_fn, on_success_fn)
+      {
+        var val = null;
+
+        if (this.Exists_In_Cache(key))
+        {
+          val = this.Get_From_Cache(key);
+          on_success_fn(val);
+        }
+        else
+        {
+          get_val_fn();
+        }
+      };
     },
 
     Select_Obj: function (db, path, on_success_fn)

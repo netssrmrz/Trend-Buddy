@@ -11,6 +11,11 @@
       this.count = null;
     },
 
+    Select_Obj: function (db, id, on_success_fn)
+    {
+      tb.data.Select_Obj(db, "/" + this.table_name + "/" + id, on_success_fn);
+    },
+
     Select_By_Query_Id: function (db, query_id, on_success_fn)
     {
       db.conn.ref("/" + this.table_name).orderByChild("query_id").equalTo(query_id).once("value", OK_Fn);
@@ -22,26 +27,32 @@
 
     Select_Chart_Vals_By_Query_Id: function (db, query_id, on_success_fn)
     {
-      tb.trend.Select_By_Query_Id(db, query_id, Select_OK);
-      function Select_OK(items)
+      var key;
+
+      key = "Select_Chart_Vals_By_Query_Id." + query_id;
+      db.If_Not_In_Cache(key, Get_Vals, on_success_fn);
+      function Get_Vals()
       {
-        var c, datetime, item_vals, item, vals=null;
-
-
-        if (!tb.Empty(items))
+        tb.trend.Select_By_Query_Id(db, query_id, Select_OK);
+        function Select_OK(items)
         {
-          vals = [];
-          vals.push(['Date', 'Jobs']);
-          for (c = 0; c < items.length; c++)
-          {
-            item = items[c];
-            item_vals = [new Date(item.datetime), item.count];
-            vals.push(item_vals);
-          }
-        }
+          var c, datetime, item_vals, item, vals;
 
-        if (on_success_fn!=null)
+          if (!tb.Empty(items))
+          {
+            vals = [];
+            vals.push(['Date', 'Jobs']);
+            for (c = 0; c < items.length; c++)
+            {
+              item = items[c];
+              item_vals = [new Date(item.datetime), item.count];
+              vals.push(item_vals);
+            }
+          }
+
+          db.Insert_In_Cache(key, vals);
           on_success_fn(vals);
+        }
       }
     },
 
