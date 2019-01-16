@@ -1,7 +1,10 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const http = require('http');
-admin.initializeApp(functions.config().firebase);
+const serviceAccount = require(__dirname + "/trend-buddy-firebase-adminsdk-ymhg3-c65d28fe1d.json");
+
+//admin.initializeApp(functions.config().firebase);
+admin.initializeApp({ credential: admin.credential.cert(serviceAccount), databaseURL: "https://trend-buddy.firebaseio.com"});
 
 exports.updateAllTrends = functions.https.onRequest(Update_All_Trends);
 
@@ -12,7 +15,6 @@ function Update_All_Trends(req, res)
     conn: admin.database()
   }
 
-  //console.log("Update_All_Trends");
   Insert_From_Queries(db, Insert_From_Queries_OK);
   function Insert_From_Queries_OK()
   {
@@ -152,4 +154,24 @@ function Req_Json(host, port, path, success_fn)
         success_fn(JSON.parse(data));
     }
   }
+}
+
+function Obj_To_Str(name, obj)
+{
+  var res = null;
+
+  if (obj != null)
+  {
+    res = [];
+    for (var m in obj)
+    {
+      if (typeof obj[m] == "function")
+        res.push(m + "()");
+      else
+        res.push(m);
+    }
+    console.log(name+": ", res);
+  }
+  else
+    console.log(name + " is null");
 }
