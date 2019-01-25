@@ -1,10 +1,10 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const http = require('http');
-const serviceAccount = require(__dirname + "/trend-buddy-firebase-adminsdk-ymhg3-c65d28fe1d.json");
+//const serviceAccount = require(__dirname + "/trend-buddy-firebase-adminsdk-ymhg3-c65d28fe1d.json");
 
-//admin.initializeApp(functions.config().firebase);
-admin.initializeApp({ credential: admin.credential.cert(serviceAccount), databaseURL: "https://trend-buddy.firebaseio.com"});
+admin.initializeApp(functions.config().firebase);
+//admin.initializeApp({ credential: admin.credential.cert(serviceAccount), databaseURL: "https://trend-buddy.firebaseio.com"});
 
 exports.updateAllTrends = functions.https.onRequest(Update_All_Trends);
 
@@ -36,6 +36,7 @@ function Insert_From_Queries(db, on_success_fn)
       Insert_From_Query(db, queries[c], Insert_From_Query_OK);
       function Insert_From_Query_OK()
       {
+        //console.log("Insert_From_Queries: ");
         todo--;
         if (todo == 0 && on_success_fn != null)
           on_success_fn();
@@ -53,11 +54,11 @@ function Insert_From_Query(db, query, on_success_fn)
     var trend;
 
     trend =
-      {
-        query_id: query.id,
-        datetime: Date.now(),
-        count: count
-      };
+    {
+      query_id: query.id,
+      datetime: Date.now(),
+      count: count
+    };
     Insert(db, trend, on_success_fn);
   }
 }
@@ -93,7 +94,12 @@ function Insert(db, obj, on_success_fn)
 {
   //console.log("Insert");
   obj.id = db.conn.ref("/trend").push().key;
-  db.conn.ref("/trend/" + obj.id).set(obj, on_success_fn);
+  db.conn.ref("/trend/" + obj.id).set(obj, on_success_fn)
+    .catch(Set_Error);
+  function Set_Error(error)
+  {
+    console.log("Insert: error - ", error);
+  }
 }
 
 function Select_Objs(db, path, on_success_fn)
@@ -102,7 +108,7 @@ function Select_Objs(db, path, on_success_fn)
   db.conn.ref(path).once('value').then(Then_OK);
   function Then_OK(query_res)
   {
-    console.log("Select_Objs.Then_OK");
+    //console.log("Select_Objs.Then_OK");
     To_Array(query_res, on_success_fn);
   }
 }
@@ -139,7 +145,7 @@ function Req_Json(host, port, path, success_fn)
 {
   var req;
 
-  console.log("Req_Json: "+path);
+  //console.log("Req_Json: "+path);
 
   http.get({"host": host, "port": port, "path": path}, Get_OK);
   function Get_OK(resp)
@@ -148,7 +154,7 @@ function Req_Json(host, port, path, success_fn)
     resp.on("data", Data_OK);
     function Data_OK(data)
     {
-      console.log("Data_OK: "+data);
+      //console.log("Data_OK: "+data);
 
       if (success_fn!=null)
         success_fn(JSON.parse(data));
