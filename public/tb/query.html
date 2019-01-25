@@ -23,7 +23,8 @@
     Insert: function (db, obj, on_success_fn)
     {
       obj.id = db.conn.ref("/" + this.table_name).push().key;
-      db.conn.ref("/" + this.table_name + "/" + obj.id).set(obj, on_success_fn);
+      db.conn.ref("/" + this.table_name + "/" + obj.id).set(obj, on_success_fn)
+        .catch(On_Insert_Error);
     },
 
     Update: function (db, obj, on_success_fn)
@@ -72,5 +73,10 @@
         }
       }
     }
-  };
+    };
+
+  function On_Insert_Error(error)
+  {
+    console.log("On_Insert_Error: ", error);
+  }
 </script>

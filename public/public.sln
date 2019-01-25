@@ -45,6 +45,11 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "functions", "..\functions\"
 		SlnRelativePath = "..\functions\"
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{856D71D4-FA7F-4178-B147-F45B8BEA7419}"
+	ProjectSection(SolutionItems) = preProject
+		..\.gitignore = ..\.gitignore
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,5 +62,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4F8430C7-290D-463D-B7C7-DE20E72D891C}
 	EndGlobalSection
 EndGlobal

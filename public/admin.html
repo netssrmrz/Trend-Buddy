@@ -3,10 +3,8 @@
 <head>
   <title>Trend Buddy</title>
 
-  <script src="https://www.gstatic.com/firebasejs/3.6.4/firebase.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/3.6.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/3.6.2/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/3.6.2/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/5.8.0/firebase.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/5.8.0/firebase-database.js"></script>
 
   <script src="/pl-elements/webcomponentsjs/webcomponents-lite.min.js"></script>
   <link rel="import" href="/pl-elements/polymer/polymer.html">
@@ -23,61 +21,70 @@
   <link rel="import" href="/tb/query.html">
   <link rel="import" href="/tb/indeed.html">
 
-  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-
   <style>
-    @font-face {
+    @font-face
+    {
       font-family: roboto;
       src: url(fonts/Roboto-Regular.ttf);
     }
 
-    body {
+    body
+    {
       font-family: roboto;
     }
 
-    #menu_items {
+    #menu_items
+    {
       margin: 0px 20px 0px 20px;
     }
 
-    #menu_items iron-icon {
+    #menu_items iron-icon
+    {
       color: #616161;
       margin-right: 20px;
       vertical-align: text-bottom;
     }
 
-    #menu_items a:hover iron-icon {
+    #menu_items a:hover iron-icon
+    {
       color: #00cc00;
     }
 
-    #menu_items a {
+    #menu_items a
+    {
       font-weight: 500;
       display: block;
       padding: 15px 10px 15px 10px;
     }
 
-    #menu_items a:hover {
+    #menu_items a:hover
+    {
       background-color: #f5f5f5;
       color: #00cc00;
       cursor: pointer;
     }
 
-    #query_form{
+    #query_form
+    {
       padding: 20px;
     }
 
-    #query_items {
+    #query_items
+    {
       border-top: 2px solid #eee;
       margin: 0px 20px 0px 20px;
     }
 
-    #query_items a {
+    #query_items a
+    {
       font-weight: 500;
       font-size: 14px;
       display: block;
       padding: 10px 10px 10px 10px;
     }
 
-    #query_items a:hover {
+    #query_items a:hover
+    {
       background-color: #f5f5f5;
       color: #00cc00;
       cursor: pointer;
@@ -102,32 +109,39 @@
       List_Query_Items();
     }
 
+    function On_Reindex2()
+    {
+      var key = "Select_Chart_Vals_By_Query_Id_-KpPWAFGBhe6CxLYn22r";
+      db.If_Not_In_Cache2(key, Gen_Val, OK)
+      function Gen_Val()
+      {
+        var val = { str: "go", no: 3 };
+        db.Insert_In_Cache2(key, val, OK);
+      }
+      function OK(res)
+      {
+        alert(res);
+      }
+    }
+
     function On_Reindex()
     {
       tb.query.Select(db, Select_OK);
       function Select_OK(queries)
       {
-        var c, query;
+        var c, key;
 
         for (c = 0; c < queries.length; c++)
         {
-          query = queries[c];
-          Del_OK.query = query;
-          db.conn.ref("/query-trend/" + query.id).remove(Del_OK);
+          Del_OK.query = queries[c];
+          key = "Select_Chart_Vals_By_Query_Id_" + queries[c].id;
+          db.conn.ref("/cache/"+key).remove(Del_OK);
           function Del_OK()
           {
             var query = Del_OK.query;
-
-            tb.trend.Select_By_Query_Id(db, query.id, Select_OK);
-            function Select_OK(entries)
+            tb.trend.Select_Chart_Vals_By_Query_Id(db, query.id, Select_OK);
+            function Select_OK(values)
             {
-              var c, entry;
-
-              for (c = 0; c<entries.length; c++)
-              {
-                entry = entries[c];
-                db.conn.ref("/query-trend/" + query.id + "/" + entry.id).set(entry.datetime);
-              }
               document.getElementById("msg").text = "Query \"" + query.title + "\" completed.";
               document.getElementById("msg").show();
             }
@@ -197,8 +211,8 @@
       tb.query.Save(db, query, Update_OK);
       function Update_OK()
       {
-        // delete trend data
-        if (t.item_elem!=null)
+        // todo: delete trend data
+        if (t.item_elem != null)
           Update_Query_Item(t.item_elem, query);
         else
           Insert_Query_Item(document.getElementById("query_items"), query);

@@ -52,6 +52,77 @@
           get_val_fn();
         }
       };
+
+      this.Exists_In_Cache2 = function (key, on_success_fn)
+      {
+        if (this.cache[key] != null && on_success_fn)
+        {
+          on_success_fn(true);
+        }
+        else
+        {
+          this.conn.ref("/cache/" + key).once('value').then(Cache_Read_OK);
+          function Cache_Read_OK(query_res)
+          {
+            var val = query_res.val();
+            if (val)
+              on_success_fn(true);
+            else
+              on_success_fn(false);
+          }
+        }
+      };
+
+      this.Get_From_Cache2 = function (key, parse_fn, on_success_fn)
+      {
+        var cache, val;
+
+        cache = this.cache;
+        val = this.cache[key];
+        if (val == null)
+        {
+          db.conn.ref("/cache/" + key).once('value').then(Then_OK);
+          function Then_OK(query_res)
+          {
+            val = query_res.val();
+            val = JSON.parse(val);
+            if (parse_fn)
+              val = parse_fn(val);
+            cache[key] = val;
+            on_success_fn(val);
+          }
+        }
+        else
+          on_success_fn(val);
+      };
+
+      this.Insert_In_Cache2 = function (key, val, on_success_fn)
+      {
+        this.cache[key] = val;
+        db.conn.ref("/cache/" + key).set(JSON.stringify(val), Insert_OK);
+        function Insert_OK()
+        {
+          on_success_fn(val);
+        }
+      };
+
+      this.If_Not_In_Cache2 = function (key, get_val_fn, parse_fn, on_success_fn)
+      {
+        var val = null, db = this;
+
+        db.Exists_In_Cache2(key, Exists_OK);
+        function Exists_OK(exists)
+        {
+          if (exists)
+          {
+            val = db.Get_From_Cache2(key, parse_fn, on_success_fn);
+          }
+          else
+          {
+            get_val_fn();
+          }
+        }
+      };
     },
 
     Select_Obj: function (db, path, on_success_fn)

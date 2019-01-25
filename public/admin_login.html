@@ -1,0 +1,86 @@
+<html>
+
+<head>
+  <title>Trend Buddy</title>
+
+  <script src="https://www.gstatic.com/firebasejs/5.7.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/5.7.2/firebase-auth.js"></script>
+  <script src="https://cdn.firebase.com/libs/firebaseui/3.1.1/firebaseui.js"></script>
+  <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.1.1/firebaseui.css" />
+
+  <style>
+    @font-face
+    {
+      font-family: roboto;
+      src: url(fonts/Roboto-Regular.ttf);
+    }
+
+    body
+    {
+      font-family: roboto;
+    }
+
+    h1
+    {
+      text-align: center;
+    }
+  </style>
+
+  <script type="text/javascript">
+    var uiConfig =
+    {
+      callbacks:
+      {
+        signInSuccessWithAuthResult: signInSuccessWithAuthResult,
+        uiShown: uiShown,
+        signInFailure: signInFailure
+      },
+      signInFlow: 'popup',
+      signInSuccessUrl: 'admin.html',
+      signInOptions: [firebase.auth.GoogleAuthProvider.PROVIDER_ID],
+      tosUrl: 'admin_login.html', // Terms of service url.
+      privacyPolicyUrl: 'admin_login.html' // Privacy policy url.
+    };
+    config =
+    {
+      apiKey: "AIzaSyAITTb3Fxh1HiyFxdObmgZ2LqJZm38EQ5k",
+      authDomain: "trend-buddy.firebaseapp.com",
+      databaseURL: "https://trend-buddy.firebaseio.com",
+      storageBucket: "trend-buddy.appspot.com",
+      messagingSenderId: "603649293586"
+    };
+
+    function Main()
+    {
+      firebase.initializeApp(config);
+
+      var ui = new firebaseui.auth.AuthUI(firebase.auth());
+      ui.start('#firebaseui-auth-container', uiConfig);
+    }
+
+    function signInSuccessWithAuthResult(authResult, redirectUrl)
+    {
+      return true;
+    }
+
+    function uiShown()
+    {
+      document.getElementById('loader').style.display = 'none';
+    }
+
+    function signInFailure(error)
+    {
+      console.log(error);
+    }
+  </script>
+</head>
+
+<body onload="Main()">
+
+  <h1>Trend Buddy Administration Website</h1>
+  <div id="firebaseui-auth-container"></div>
+  <div id="loader">Loading...</div>
+
+</body>
+
+</html>

@@ -17,6 +17,7 @@
   <link rel="import" href="/pl-elements/iron-icons/iron-icons.html">
   <link rel="import" href="/pl-elements/paper-toast/paper-toast.html">
   <link rel="import" href="/pl-elements/paper-spinner/paper-spinner.html">
+  <link rel="import" href="/pl-elements/paper-checkbox/paper-checkbox.html">
 
   <link rel="import" href="/tb/init.html">
   <link rel="import" href="/tb/data.html">
@@ -44,6 +45,11 @@
       color: #616161;
       margin-right: 20px;
       vertical-align: text-bottom;
+    }
+
+    .menu_items paper-checkbox
+    {
+      float: right;
     }
 
     .menu_items a:hover iron-icon {
@@ -120,7 +126,7 @@
 
         for (c = 0; c < queries.length; c++)
         {
-          var item_elem, query;
+          var item_elem, query, chk_elem;
 
           query = queries[c];
           item_elem = document.createElement("a");
@@ -128,9 +134,18 @@
           item_elem.query = query;
           item_elem.onclick = On_Show_Chart;
 
+          chk_elem = document.createElement("paper-checkbox");
+          chk_elem.onclick = On_Choose_Chart;
+          item_elem.appendChild(chk_elem);
+
           list_elem.appendChild(item_elem);
         }
       }
+    }
+
+    function On_Choose_Chart(event)
+    {
+      event.stopPropagation();
     }
 
     function Draw_Chart_By_Query_Id(db, id)
