@@ -18,7 +18,7 @@ class Db
       res = true;
 
     return res;
-  };
+  }
 
   Get_From_Cache(key)
   {

@@ -13,12 +13,9 @@ class Util
     http.get({"host": host, "port": port, "path": path}, Get_OK);
     function Get_OK(resp)
     {
-      //console.log("Get_OK");
       resp.on("data", Data_OK);
       function Data_OK(data)
       {
-        //console.log("Data_OK: "+data);
-
         if (success_fn!=null)
           success_fn(JSON.parse(data));
       }
@@ -27,12 +24,12 @@ class Util
 
   static Clr_Child_Elems(elem, start)
   {
-    Clr_Children(elem, start, Polymer.dom(elem).children);
+    Util.Clr_Children(elem, start, Polymer.dom(elem).children);
   }
 
   static Clr_Child_Nodes(elem, start)
   {
-    Clr_Children(elem, start, Polymer.dom(elem).childNodes);
+    Util.Clr_Children(elem, start, Polymer.dom(elem).childNodes);
   }
 
   static Clr_Children(elem, start, children)
