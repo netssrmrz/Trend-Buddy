@@ -90,7 +90,7 @@ class Db
 
   Insert_In_Cache2(key, val, on_success_fn)
   {
-    console.log("Db.Insert_In_Cache2: key =", key);
+    //console.log("Db.Insert_In_Cache2: key =", key);
     this.cache[key] = val;
     this.conn.ref("/cache/" + key).set(JSON.stringify(val), Insert_OK);
     function Insert_OK()
@@ -125,7 +125,7 @@ class Db
 
   Select_Obj(path, on_success_fn)
   {
-    console.log("Db.Select_Obj: path =", path);
+    //console.log("Db.Select_Obj: path =", path);
     this.conn.ref(path).once('value').then(Then_OK);
     function Then_OK(query_res)
     {

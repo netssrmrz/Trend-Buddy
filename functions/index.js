@@ -5,8 +5,6 @@ const Query = require('./tb/query');
 var db = new Db();
 
 exports.updateAllTrends = functions.https.onRequest(Update_All_Trends);
-exports.test = functions.https.onRequest(Test);
-
 function Update_All_Trends(req, res)
 {
   Query.Insert_Trends(db, Insert_From_Queries_OK);
@@ -17,6 +15,7 @@ function Update_All_Trends(req, res)
   }
 }
 
+exports.test = functions.https.onRequest(Test);
 function Test(req, res)
 {
   Query.Insert_Trends(db, OK2);

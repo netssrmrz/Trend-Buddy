@@ -55,7 +55,7 @@ const Util = require('./init');
 
     static Calc_Chart_Vals_By_Query_Id(db, query_id, on_success_fn)
     {
-      console.log("Trend.Calc_Chart_Vals_By_Query_Id: query_id =", query_id);
+      //console.log("Trend.Calc_Chart_Vals_By_Query_Id: query_id =", query_id);
       Trend.Select_By_Query_Id(db, query_id, Select_OK);
       function Select_OK(items)
       {
@@ -79,7 +79,7 @@ const Util = require('./init');
 
     Insert(db, on_success_fn)
     {
-      console.log("Trend.Insert: this =", this);
+      //console.log("Trend.Insert: this =", this);
       db.Insert("/trend", this, on_success_fn);
     }
 

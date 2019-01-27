@@ -8,7 +8,7 @@ class Util
   {
     var req;
 
-    console.log("Req_Json: entry");
+    //console.log("Req_Json: entry");
 
     http.get({"host": host, "port": port, "path": path}, Get_OK);
     function Get_OK(resp)

@@ -6,7 +6,7 @@ class Indeed
   {
     var path;
 
-    console.log("Indeed.Get_Job_Count: query =", query);
+    //console.log("Indeed.Get_Job_Count: query =", query);
     path =
       "/ads/apisearch?" +
       "publisher=6433637473123845&" +
