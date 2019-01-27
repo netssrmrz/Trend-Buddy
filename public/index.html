@@ -4,9 +4,9 @@
   <title>Trend Buddy</title>
 
   <script src="https://www.gstatic.com/firebasejs/3.6.4/firebase.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/3.6.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/3.6.2/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/3.6.2/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/3.6.4/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/3.6.4/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/3.6.4/firebase-database.js"></script>
 
   <script src="/pl-elements/webcomponentsjs/webcomponents-lite.min.js"></script>
   <link rel="import" href="/pl-elements/polymer/polymer.html">
@@ -19,29 +19,32 @@
   <link rel="import" href="/pl-elements/paper-spinner/paper-spinner.html">
   <link rel="import" href="/pl-elements/paper-checkbox/paper-checkbox.html">
 
-  <link rel="import" href="/tb/init.html">
-  <link rel="import" href="/tb/data.html">
-  <link rel="import" href="/tb/trend.html">
-  <link rel="import" href="/tb/query.html">
-  <link rel="import" href="/tb/indeed.html">
-
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
+  <script type="text/javascript" src="/tb/init.js"></script>
+  <script type="text/javascript" src="/tb/data.js"></script>
+  <script type="text/javascript" src="/tb/query.js"></script>
+  <script type="text/javascript" src="/tb/trend.js"></script>
+
   <style>
-    @font-face {
+    @font-face
+    {
       font-family: roboto;
       src: url(fonts/Roboto-Regular.ttf);
     }
 
-    body {
+    body
+    {
       font-family: roboto;
     }
 
-    .menu_items {
+    .menu_items
+    {
       margin: 20px 0px 20px 0px;
     }
 
-    .menu_items iron-icon {
+    .menu_items iron-icon
+    {
       color: #616161;
       margin-right: 20px;
       vertical-align: text-bottom;
@@ -52,24 +55,28 @@
       float: right;
     }
 
-    .menu_items a:hover iron-icon {
+    .menu_items a:hover iron-icon
+    {
       color: #00cc00;
     }
 
-    .menu_items a {
+    .menu_items a
+    {
       font-weight: 500;
       font-size: 14px;
       display: block;
       padding: 10px 20px 10px 20px;
     }
 
-    .menu_items a:hover {
+    .menu_items a:hover
+    {
       background-color: #f5f5f5;
       color: #00cc00;
       cursor: pointer;
     }
 
-    #curve_chart {
+    #curve_chart
+    {
       height: 90%;
     }
 
@@ -87,18 +94,18 @@
     }
   </style>
 
-  <script type="text/javascript">
+  <script>
     var db;
 
     function Main()
     {
-      db = new tb.data.Db();
+      db = new Db();
 
       List_Query_Items();
       Init_Chart();
     }
 
-    function Init_Chart() 
+    function Init_Chart()
     {
       var chart_elem;
 
@@ -117,7 +124,7 @@
 
     function List_Query_Items()
     {
-      tb.query.Select(db, Select_OK);
+      Query.Select_Objs(db, Select_OK);
       function Select_OK(queries)
       {
         var c, list_elem;
@@ -150,15 +157,15 @@
 
     function Draw_Chart_By_Query_Id(db, id)
     {
-      tb.query.Select_Obj(db, id, Select_Obj_OK);
+      Query.Select_Obj(db, id, Select_Obj_OK);
       function Select_Obj_OK(query)
       {
-        tb.trend.Select_Chart_Vals_By_Query_Id(db, id, Select_OK);
+        Trend.Select_Chart_Vals_By_Query_Id(db, id, Select_OK);
         function Select_OK(data_vals)
         {
           var data_table, options;
 
-          if (tb.Empty(data_vals))
+          if (Util.Empty(data_vals))
             alert("No Data");
           else
           {
@@ -172,66 +179,6 @@
             };
             document.getElementById("wait_dlg").style.display = "none";
             document.getElementById("curve_chart").chart.draw(data_table, options);
-          }
-        }
-      }
-    }
-
-    function Draw_Chart_By_Query_Id2(db, id)
-    {
-      tb.query.Select_Obj(db, id, Select_Obj_OK);
-      function Select_Obj_OK(query)
-      {
-        var data_table, options;
-
-        data_table = new google.visualization.DataTable();
-        data_table.addColumn("datetime", "Date");
-        data_table.addColumn("number", "Jobs");
-
-        options = {
-          title: query.title,
-          curveType: 'line',
-          chartArea: { width: "80%", height: "80%" },
-          legend: { position: "none" },
-          animation: { duration: 0, easing: 'linear', },
-        };
-
-        document.getElementById("curve_chart").chart.draw(data_table, options);
-        Draw_Segment(db, query.id, null, data_table, options);
-      }
-    }
-
-    function Draw_Segment(db, query_id, start_key, data_table, options)
-    {
-      var seg_size = 100;
-
-      if (start_key!=null)
-        db.conn.ref("/query-trend/" + query_id).orderByKey().startAt(start_key).limitToFirst(seg_size).once("value", OK_Fn);
-      else
-        db.conn.ref("/query-trend/" + query_id).orderByKey().limitToFirst(seg_size).once("value", OK_Fn);
-      function OK_Fn(snapshot)
-      {
-        var keys, todo, c;
-
-        keys = Object.keys(snapshot.val());
-        todo = keys.length - 1;
-        for (c = 0; c < keys.length-1; c++)
-        {
-          tb.trend.Select_Obj(db, keys[c], Select_OK);
-          function Select_OK(trend)
-          {
-            data_table.addRow([new Date(trend.datetime), trend.count]);
-            todo--;
-
-            if (todo == 0)
-            {
-              document.getElementById("curve_chart").chart.draw(data_table, options);
-              setTimeout(Draw_Next_Segment);
-              function Draw_Next_Segment()
-              {
-                Draw_Segment(db, query_id, keys[keys.length - 1], data_table, options);
-              }
-            }
           }
         }
       }
