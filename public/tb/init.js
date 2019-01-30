@@ -128,5 +128,3 @@ class Util
     }
   }
 }
-
-window.addEventListener('WebComponentsReady', Util.WebComponentsReady);

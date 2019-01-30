@@ -6,6 +6,8 @@ class Query
     this.id = null;
     this.title = null;
     this.terms = null;
+    this.order = null;
+    this.parent_id = null;
   }
 
   static Select_Objs(db, on_success_fn)

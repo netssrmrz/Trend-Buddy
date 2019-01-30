@@ -50,3 +50,5 @@ Temporary Items
 .apdisk
 /functions/trend-buddy-firebase-adminsdk-ymhg3-c65d28fe1d.json
 /.vs
+/functions/package-lock.json
+/package-lock.json
