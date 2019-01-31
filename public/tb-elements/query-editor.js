@@ -1,6 +1,7 @@
 ﻿import { PolymerElement, html } from '/polymer/polymer/polymer-element.js';
 import '/polymer/paper-input/paper-input.js';
 import '/polymer/paper-button/paper-button.js';
+import '/tb/init.js';
 
 class QueryEditor extends PolymerElement
 {
@@ -58,11 +59,11 @@ class QueryEditor extends PolymerElement
     if (this.on_save_fn != null)
     {
       query = new Query();
-      query.id = No_Undef(this.query_id);
-      query.title = No_Undef(this.$.query_title.value);
-      query.terms = No_Undef(this.$.query_terms.value);
-      query.order = No_Undef(this.$.query_order.value);
-      query.parent_id = No_Undef(this.$.query_parent.value);
+      query.id = Util.No_Undef(this.query_id);
+      query.title = Util.No_Undef(this.$.query_title.value);
+      query.terms = Util.No_Undef(this.$.query_terms.value);
+      query.order = Util.To_Int(this.$.query_order.value);
+      query.parent_id = Util.No_Undef(this.$.query_parent.value);
       this.on_save_fn(query);
     }
   }
@@ -80,10 +81,3 @@ class QueryEditor extends PolymerElement
   }
 }
 customElements.define('query-editor', QueryEditor);
-
-function No_Undef(val)
-{
-  if (val == undefined)
-    val = null;
-  return val;
-}

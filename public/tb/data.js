@@ -156,9 +156,14 @@ class Db
     }
   }
 
-  Select_Objs(path, on_success_fn)
+  Select_Objs(path, on_success_fn, order_by)
   {
-    this.conn.ref(path).once('value').then(Then_OK);
+    var ref;
+
+    ref = this.conn.ref(path);
+    if (order_by)
+      ref = ref.orderByChild(order_by);
+    ref.once('value').then(Then_OK);
     function Then_OK(query_res)
     {
       Db.To_Array(query_res, on_success_fn);

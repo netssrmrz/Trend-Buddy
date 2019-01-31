@@ -13,7 +13,34 @@ class Query
   static Select_Objs(db, on_success_fn)
   {
     //console.log("Query.Select_Objs");
-    db.Select_Objs("/query", on_success_fn);
+    db.Select_Objs("/query", Select_OK);
+    function Select_OK(objs)
+    {
+      if (objs)
+      {
+        objs.sort(Compare);
+        function Compare(a, b)
+        {
+          var res;
+
+          if (a.order && !b.order)
+            res = -1;
+          else if (!a.order && b.order)
+            res = 1;
+          else if (!a.order && !b.order)
+            res = 0;
+          else if (a.order < b.order)
+            res = -1;
+          else if (a.order > b.order)
+            res = 1;
+          else
+            res = 0;
+
+          return res;
+        }
+      }
+      on_success_fn(objs);
+    }
   }
 
   static Select_Obj(db, id, on_success_fn)
