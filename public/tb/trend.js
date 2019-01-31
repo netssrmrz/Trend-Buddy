@@ -41,11 +41,12 @@ class Trend
     {
       var c, item;
 
-      for (c = 1; c < items.length; c++)
-      {
-        item = items[c];
-        item[0] = new Date(item[0]);
-      }
+      if (items)
+        for (c = 1; c < items.length; c++)
+        {
+          item = items[c];
+          item[0] = new Date(item[0]);
+        }
 
       return items;
     }

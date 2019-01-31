@@ -29,7 +29,7 @@ class Query
 
   Update(db, on_success_fn)
   {
-    db.conn.ref("/query/" + this.id).set(obj, on_success_fn);
+    db.Update("/query", this, on_success_fn);
   }
 
   Save(db, on_success_fn)

@@ -30,18 +30,24 @@ class QueryEditor extends PolymerElement
 
   Add()
   {
+    this.query_id = null;
+    this.$.query_id.value = "";
     this.$.query_title.value = "";
     this.$.query_terms.value = "";
-    this.query_id = null;
+    this.$.query_order.value = "";
+    this.$.query_parent.value = "";
   }
 
   Edit(query)
   {
     if (query != null)
     {
+      this.query_id = query.id;
+      this.$.query_id.value = query.id;
       this.$.query_title.value = query.title;
       this.$.query_terms.value = query.terms;
-      this.query_id = query.id;
+      this.$.query_order.value = query.order;
+      this.$.query_parent.value = query.parent_id;
     }
   }
 
@@ -52,9 +58,11 @@ class QueryEditor extends PolymerElement
     if (this.on_save_fn != null)
     {
       query = new Query();
-      query.id = this.query_id;
-      query.title = this.$.query_title.value;
-      query.terms = this.$.query_terms.value;
+      query.id = No_Undef(this.query_id);
+      query.title = No_Undef(this.$.query_title.value);
+      query.terms = No_Undef(this.$.query_terms.value);
+      query.order = No_Undef(this.$.query_order.value);
+      query.parent_id = No_Undef(this.$.query_parent.value);
       this.on_save_fn(query);
     }
   }
@@ -72,3 +80,10 @@ class QueryEditor extends PolymerElement
   }
 }
 customElements.define('query-editor', QueryEditor);
+
+function No_Undef(val)
+{
+  if (val == undefined)
+    val = null;
+  return val;
+}

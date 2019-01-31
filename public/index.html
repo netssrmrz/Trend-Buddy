@@ -186,7 +186,7 @@
           var data_table, options;
 
           if (Util.Empty(data_vals))
-            alert("No Data");
+            document.getElementById("no_data").show();
           else
           {
             data_table = google.visualization.arrayToDataTable(data_vals);
@@ -197,9 +197,10 @@
               legend: { position: "none" },
               animation: { duration: 1000, easing: 'linear', },
             };
-            document.getElementById("wait_dlg").style.display = "none";
             document.getElementById("curve_chart").chart.draw(data_table, options);
           }
+
+          document.getElementById("wait_dlg").style.display = "none";
         }
       }
     }
@@ -237,6 +238,8 @@
   <div id="wait_dlg" class="overlay">
     <paper-spinner active></paper-spinner>
   </div>
+
+  <paper-toast id="no_data" text="No data is available yet."></paper-toast>
 
 </body>
 

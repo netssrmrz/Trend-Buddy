@@ -3,10 +3,11 @@
 <head>
   <title>Trend Buddy</title>
 
-  <script src="https://www.gstatic.com/firebasejs/5.7.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/5.7.2/firebase-auth.js"></script>
-  <script src="https://cdn.firebase.com/libs/firebaseui/3.1.1/firebaseui.js"></script>
-  <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.1.1/firebaseui.css" />
+  <script src="https://www.gstatic.com/firebasejs/5.8.0/firebase.js"></script>
+  <script src="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.js"></script>
+  <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.5.2/firebaseui.css" />
+
+  <script type="text/javascript" src="/tb/data.js"></script>
 
   <style>
     @font-face
@@ -41,19 +42,10 @@
       tosUrl: 'admin_login.html', // Terms of service url.
       privacyPolicyUrl: 'admin_login.html' // Privacy policy url.
     };
-    config =
-    {
-      apiKey: "AIzaSyAITTb3Fxh1HiyFxdObmgZ2LqJZm38EQ5k",
-      authDomain: "trend-buddy.firebaseapp.com",
-      databaseURL: "https://trend-buddy.firebaseio.com",
-      storageBucket: "trend-buddy.appspot.com",
-      messagingSenderId: "603649293586"
-    };
 
     function Main()
     {
-      firebase.initializeApp(config);
-
+      var db = new Db();
       var ui = new firebaseui.auth.AuthUI(firebase.auth());
       ui.start('#firebaseui-auth-container', uiConfig);
     }

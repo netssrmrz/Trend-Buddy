@@ -16,6 +16,7 @@ class Db
     firebase.initializeApp(config);
     this.conn = firebase.database();
 
+    this.use_cache = true;
     this.cache = [];
   }
 
@@ -56,22 +57,27 @@ class Db
 
   Exists_In_Cache2(key, on_success_fn)
   {
-    if (this.cache[key] != null && on_success_fn)
+    if (this.use_cache)
     {
-      on_success_fn(true);
-    }
-    else
-    {
-      this.conn.ref("/cache/" + key).once('value').then(Cache_Read_OK);
-      function Cache_Read_OK(query_res)
+      if (this.cache[key] != null)
       {
-        var val = query_res.val();
-        if (val)
-          on_success_fn(true);
-        else
-          on_success_fn(false);
+        on_success_fn(true);
+      }
+      else
+      {
+        this.conn.ref("/cache/" + key).once('value').then(Cache_Read_OK);
+        function Cache_Read_OK(query_res)
+        {
+          var val = query_res.val();
+          if (val)
+            on_success_fn(true);
+          else
+            on_success_fn(false);
+        }
       }
     }
+    else
+      on_success_fn(false);
   }
 
   Get_From_Cache2(key, parse_fn, on_success_fn)
@@ -100,12 +106,19 @@ class Db
   Insert_In_Cache2(key, val, on_success_fn)
   {
     //console.log("Db.Insert_In_Cache2: key =", key);
-    this.cache[key] = val;
-    this.conn.ref("/cache/" + key).set(JSON.stringify(val), Insert_OK);
-    function Insert_OK()
+    if (this.use_cache)
     {
-      on_success_fn(val);
+      if (val == undefined)
+        val = null;
+      this.cache[key] = val;
+      this.conn.ref("/cache/" + key).set(JSON.stringify(val), Insert_OK);
+      function Insert_OK()
+      {
+        on_success_fn(val);
+      }
     }
+    else
+      on_success_fn(val);
   }
 
   If_Not_In_Cache2(key, get_val_fn, parse_fn, on_success_fn)
@@ -156,11 +169,23 @@ class Db
   {
     //console.log("Insert");
     obj.id = this.conn.ref(path).push().key;
-    this.conn.ref(path + "/" + obj.id).set(obj, on_success_fn)
-      .catch(Set_Error);
-    function Set_Error(error)
+    this.conn.ref(path + "/" + obj.id).set(obj, on_success_fn);
+  }
+
+  Update(path, obj, on_success_fn)
+  {
+    //console.log("Update");
+    var ref, promise;
+
+    try
     {
-      console.log("Insert: error - ", error);
+      ref = this.conn.ref(path + "/" + obj.id);
+      promise = ref.set(obj);
+      promise.then(on_success_fn, on_success_fn);
+    }
+    catch (err)
+    {
+      on_success_fn(err);
     }
   }
 
