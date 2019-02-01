@@ -116,7 +116,7 @@ class Query
       trend.Insert(db, Insert_OK);
       function Insert_OK()
       {
-        Trend.Calc_Chart_Vals_By_Query_Id(db, query.id, Calc_OK);
+        Trend.Calc_Chart_Vals_By_Query(db, query, Calc_OK);
         function Calc_OK(vals)
         {
           var key = "Select_Chart_Vals_By_Query_Id_" + query.id;

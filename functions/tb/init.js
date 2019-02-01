@@ -127,6 +127,28 @@ class Util
       Main();
     }
   }
-}
+  
+  static No_Undef(val)
+  {
+    if (val == undefined)
+      val = null;
+    return val;
+  }
 
+  static To_Int(val)
+  {
+    var res = val;
+
+    if (val)
+    {
+      res = parseInt(val);
+      if (isNaN(res))
+        res = null;
+    }
+    else
+      res = Util.No_Undef(val);
+
+    return res;
+  }
+}
 module.exports = Util;

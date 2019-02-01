@@ -9,12 +9,41 @@ class Query
     this.id = null;
     this.title = null;
     this.terms = null;
+    this.order = null;
+    this.parent_id = null;
   }
 
   static Select_Objs(db, on_success_fn)
   {
     //console.log("Query.Select_Objs");
-    db.Select_Objs("/query", on_success_fn);
+    db.Select_Objs("/query", Select_OK);
+    function Select_OK(objs)
+    {
+      if (objs)
+      {
+        objs.sort(Compare);
+        function Compare(a, b)
+        {
+          var res;
+
+          if (a.order && !b.order)
+            res = -1;
+          else if (!a.order && b.order)
+            res = 1;
+          else if (!a.order && !b.order)
+            res = 0;
+          else if (a.order < b.order)
+            res = -1;
+          else if (a.order > b.order)
+            res = 1;
+          else
+            res = 0;
+
+          return res;
+        }
+      }
+      on_success_fn(objs);
+    }
   }
 
   static Select_Obj(db, id, on_success_fn)
@@ -30,7 +59,7 @@ class Query
 
   Update(db, on_success_fn)
   {
-    db.conn.ref("/query/" + this.id).set(obj, on_success_fn);
+    db.Update("/query", this, on_success_fn);
   }
 
   Save(db, on_success_fn)
@@ -90,7 +119,7 @@ class Query
       trend.Insert(db, Insert_OK);
       function Insert_OK()
       {
-        Trend.Calc_Chart_Vals_By_Query_Id(db, query.id, Calc_OK);
+        Trend.Calc_Chart_Vals_By_Query(db, query, Calc_OK);
         function Calc_OK(vals)
         {
           var key = "Select_Chart_Vals_By_Query_Id_" + query.id;

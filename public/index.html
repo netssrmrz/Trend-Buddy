@@ -114,7 +114,7 @@
   </style>
 
   <script>
-    var db;
+    var db, chart_data;
 
     window.onload = Main;
     function Main()
@@ -162,6 +162,8 @@
           item_elem.onclick = On_Show_Chart;
 
           chk_elem = document.createElement("paper-checkbox");
+          chk_elem.id = "query_chk_" + query.id;
+          chk_elem.query = query;
           chk_elem.onclick = On_Choose_Chart;
           item_elem.appendChild(chk_elem);
 
@@ -173,31 +175,47 @@
     function On_Choose_Chart(event)
     {
       event.stopPropagation();
+      if (this.checked)
+        Draw_Chart_By_Query_Id(db, this.query.id, false);
+      else
+        Hide_Chart(this.query);
     }
 
-    function Draw_Chart_By_Query_Id(db, id)
+    function On_Show_Chart()
     {
+      Uncheck_All_Queries();
+      document.getElementById("query_chk_" + this.query.id).checked = true;
+      Draw_Chart_By_Query_Id(db, this.query.id, true);
+    }
+
+    function Uncheck_All_Queries()
+    {
+      var chk_elems, i;
+
+      chk_elems = document.querySelectorAll("#query_items paper-checkbox");
+      for (i = 0; i < chk_elems.length; i++)
+        chk_elems[i].checked = false;
+    }
+
+    function Draw_Chart_By_Query_Id(db, id, single_query)
+    {
+      document.getElementById("wait_dlg").style.display = "flex";
       Query.Select_Obj(db, id, Select_Obj_OK);
       function Select_Obj_OK(query)
       {
-        Trend.Select_Chart_Vals_By_Query_Id(db, id, Select_OK);
+        Trend.Select_Chart_Vals_By_Query(db, query, Select_OK);
         function Select_OK(data_vals)
         {
-          var data_table, options;
-
           if (Util.Empty(data_vals))
             document.getElementById("no_data").show();
           else
           {
-            data_table = google.visualization.arrayToDataTable(data_vals);
-            options = {
-              title: query.title,
-              curveType: 'line',
-              chartArea: { width: "80%", height: "80%" },
-              legend: { position: "none" },
-              animation: { duration: 1000, easing: 'linear', },
-            };
-            document.getElementById("curve_chart").chart.draw(data_table, options);
+            if (chart_data == null || single_query)
+              chart_data = Copy_Data(data_vals);
+            else
+              Merge_Data(chart_data, data_vals);
+
+            Draw_Chart();
           }
 
           document.getElementById("wait_dlg").style.display = "none";
@@ -205,12 +223,155 @@
       }
     }
 
-    function On_Show_Chart()
+    function Hide_Chart(query)
     {
-      document.getElementById("wait_dlg").style.display = "flex";
-      Draw_Chart_By_Query_Id(db, this.query.id);
+      var i, col_idx, new_data;
+
+      for (i = 0; i < chart_data[0].length; i++)
+        if (chart_data[0][i] == query.title)
+          col_idx = i;
+
+      new_data = [];
+      for (i = 0; i < chart_data.length; i++)
+      {
+        chart_data[i].splice(col_idx, 1);
+        if (Row_Has_Data(chart_data[i]))
+          new_data.push(chart_data[i]);
+      }
+      chart_data = new_data;
+
+      Draw_Chart();
     }
 
+    function Draw_Chart()
+    {
+      var data_table, options;
+
+      data_table = google.visualization.arrayToDataTable(chart_data);
+      options = {
+        title: "Job Count",
+        curveType: 'line',
+        chartArea: { width: "80%", height: "80%" },
+        legend: { position: "top" },
+        animation: { duration: 1000, easing: 'linear', },
+        interpolateNulls: true
+      };
+      document.getElementById("curve_chart").chart.draw(data_table, options);
+    }
+
+    function Row_Has_Data(row)
+    {
+      var i, has_data = false;
+
+      for (i = 1; i < row.length && !has_data; i++)
+        if (row[i])
+          has_data = true;
+
+      return has_data;
+    }
+
+    function Copy_Data(data)
+    {
+      var res = null, i;
+
+      if (data)
+      {
+        res = [];
+        for (i = 0; i < data.length; i++)
+          res.push(data[i].slice());
+      }
+      return res;
+    }
+
+    function Merge_Data(dest, src)
+    {
+      var i, row;
+
+      if (dest && src)
+      {
+        Add_Column(dest, src[0][1]);
+        for (i = 1; i < src.length; i++)
+        {
+          row = Find_Row(dest, src[i][0]);
+          if (row)
+          {
+            if (row.action == "add")
+            {
+              Add_Row(dest, src[i]);
+            }
+            else if (row.action == "insert")
+            {
+              Insert_Row(dest, row.index, src[i]);
+            }
+            else if (row.action == "set")
+            {
+              Set_Row(dest, row.index, src[i]);
+            }
+          }
+        }
+      }
+    }
+
+    function Add_Column(dst, name)
+    {
+      var i, title_row;
+
+      for (i = 0; i < dst.length; i++)
+        dst[i].push(null);
+      title_row = dst[0];
+      title_row[title_row.length - 1] = name;
+    }
+
+    function Find_Row(data, val)
+    {
+      var i, res = null;
+
+      if (data && val)
+      {
+        for (i = 1; i < data.length && res == null; i++)
+        {
+          if (data[i][0] == val)
+            res = { index: i, action: "set" };
+          else if (data[i][0] > val)
+            res = { index: i, action: "insert" };
+        }
+        if (res == null)
+          res = { index: null, action: "add" };
+      }
+
+      return res;
+    }
+
+    function Add_Row(dst, row)
+    {
+      var new_row = New_Row(row, dst[0].length);
+      dst.push(new_row);
+    }
+
+    function Insert_Row(dst, row_index, row)
+    {
+      var new_row = New_Row(row, dst[0].length);
+      dst.splice(row_index, 0, new_row);
+    }
+
+    function Set_Row(dst, row_index, row)
+    {
+      var dst_row = dst[row_index];
+      dst_row[dst_row.length-1] = row[1];
+    }
+
+    function New_Row(row, required_length)
+    {
+      var new_row, i;
+
+      new_row = [];
+      for (i = 0; i < required_length; i++)
+        new_row.push(null);
+      new_row[0] = row[0]; // insert date
+      new_row[required_length-1] = row[1]; // insert job count
+
+      return new_row;
+    }
   </script>
 </head>
 

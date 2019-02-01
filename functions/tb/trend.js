@@ -25,15 +25,15 @@ const Util = require('./init');
       }
     }
 
-    static Select_Chart_Vals_By_Query_Id(db, query_id, on_success_fn)
+  static Select_Chart_Vals_By_Query(db, query, on_success_fn)
     {
       var key;
 
-      key = "Select_Chart_Vals_By_Query_Id_" + query_id;
+    key = "Select_Chart_Vals_By_Query_" + query.id;
       db.If_Not_In_Cache2(key, Get_Vals, Parse_Vals, on_success_fn);
       function Get_Vals()
       {
-        Trend.Calc_Chart_Vals_By_Query_Id(db, query_id, Calc_OK);
+      Trend.Calc_Chart_Vals_By_Query(db, query, Calc_OK);
         function Calc_OK(vals)
         {
           db.Insert_In_Cache2(key, vals, on_success_fn);
@@ -43,6 +43,7 @@ const Util = require('./init');
       {
         var c, item;
 
+      if (items)
         for (c = 1; c < items.length; c++)
         {
           item = items[c];
@@ -53,10 +54,10 @@ const Util = require('./init');
       }
     }
 
-    static Calc_Chart_Vals_By_Query_Id(db, query_id, on_success_fn)
+  static Calc_Chart_Vals_By_Query(db, query, on_success_fn)
     {
-      //console.log("Trend.Calc_Chart_Vals_By_Query_Id: query_id =", query_id);
-      Trend.Select_By_Query_Id(db, query_id, Select_OK);
+    //console.log("Trend.Calc_Chart_Vals_By_Query: query.id =", query.id);
+    Trend.Select_By_Query_Id(db, query.id, Select_OK);
       function Select_OK(items)
       {
         var c, item_vals, item, vals;
@@ -64,7 +65,7 @@ const Util = require('./init');
         if (!Util.Empty(items))
         {
           vals = [];
-          vals.push(['Date', 'Jobs']);
+        vals.push(['Date', query.title]);
           for (c = 0; c < items.length; c++)
           {
             item = items[c];
@@ -92,6 +93,6 @@ const Util = require('./init');
     {
       db.conn.ref("/trend/" + id).remove(on_success_fn);
     }
-  };
+  }
 
 module.exports = Trend;

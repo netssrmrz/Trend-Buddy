@@ -150,7 +150,7 @@
           function Del_OK()
           {
             var query = Del_OK.query;
-            Trend.Select_Chart_Vals_By_Query_Id(db, query.id, Select_OK);
+            Trend.Select_Chart_Vals_By_Query(db, query, Select_OK);
             function Select_OK(values)
             {
               document.getElementById("msg").text = "Query \"" + query.title + "\" completed.";

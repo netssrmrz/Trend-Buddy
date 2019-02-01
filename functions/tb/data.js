@@ -7,6 +7,8 @@ class Db
   {
     firebase.initializeApp(functions.config().firebase);
     this.conn = firebase.database();
+
+    this.use_cache = true;
     this.cache = [];
   }
 
@@ -47,7 +49,9 @@ class Db
 
   Exists_In_Cache2(key, on_success_fn)
   {
-    if (this.cache[key] != null && on_success_fn)
+    if (this.use_cache)
+    {
+      if (this.cache[key] != null)
     {
       on_success_fn(true);
     }
@@ -63,6 +67,9 @@ class Db
           on_success_fn(false);
       }
     }
+  }
+    else
+      on_success_fn(false);
   }
 
   Get_From_Cache2(key, parse_fn, on_success_fn)
@@ -91,12 +98,19 @@ class Db
   Insert_In_Cache2(key, val, on_success_fn)
   {
     //console.log("Db.Insert_In_Cache2: key =", key);
+    if (this.use_cache)
+    {
+      if (val == undefined)
+        val = null;
     this.cache[key] = val;
     this.conn.ref("/cache/" + key).set(JSON.stringify(val), Insert_OK);
     function Insert_OK()
     {
       on_success_fn(val);
     }
+  }
+    else
+      on_success_fn(val);
   }
 
   If_Not_In_Cache2(key, get_val_fn, parse_fn, on_success_fn)
@@ -134,9 +148,14 @@ class Db
     }
   }
 
-  Select_Objs(path, on_success_fn)
+  Select_Objs(path, on_success_fn, order_by)
   {
-    this.conn.ref(path).once('value').then(Then_OK);
+    var ref;
+
+    ref = this.conn.ref(path);
+    if (order_by)
+      ref = ref.orderByChild(order_by);
+    ref.once('value').then(Then_OK);
     function Then_OK(query_res)
     {
       Db.To_Array(query_res, on_success_fn);
@@ -147,11 +166,23 @@ class Db
   {
     //console.log("Insert");
     obj.id = this.conn.ref(path).push().key;
-    this.conn.ref(path + "/" + obj.id).set(obj, on_success_fn)
-      .catch(Set_Error);
-    function Set_Error(error)
+    this.conn.ref(path + "/" + obj.id).set(obj, on_success_fn);
+  }
+
+  Update(path, obj, on_success_fn)
     {
-      console.log("Insert: error - ", error);
+    //console.log("Update");
+    var ref, promise;
+
+    try
+    {
+      ref = this.conn.ref(path + "/" + obj.id);
+      promise = ref.set(obj);
+      promise.then(on_success_fn, on_success_fn);
+    }
+    catch (err)
+    {
+      on_success_fn(err);
     }
   }
 
