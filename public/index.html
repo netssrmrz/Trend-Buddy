@@ -47,16 +47,22 @@
       font-family: roboto;
     }
 
+    #title
+    {
+      font-size: 30px;
+    }
+
     #header
     {
-      color: white;
-      background-color: deepskyblue;
+      color: black;
+      background-color: white;
     }
 
     #query_items
     {
       height: 100%;
       overflow: auto;
+      background-color: lightgreen;
     }
 
     .menu_items
@@ -250,12 +256,17 @@
 
       data_table = google.visualization.arrayToDataTable(chart_data);
       options = {
-        title: "Job Count",
         curveType: 'line',
-        chartArea: { width: "80%", height: "80%" },
-        legend: { position: "top" },
-        animation: { duration: 1000, easing: 'linear', },
-        interpolateNulls: true
+        chartArea: { width: "90%", height: "80%" },
+        legend:
+        {
+          position: "top",
+          textStyle: { fontName: "roboto", fontSize: 14 }
+        },
+        animation: { startup: false, duration: 0, easing: 'linear', },
+        interpolateNulls: true,
+        fontName: "roboto",
+        fontSize: 9
       };
       document.getElementById("curve_chart").chart.draw(data_table, options);
     }
@@ -388,11 +399,11 @@
       <app-header id="header" slot="header">
         <app-toolbar>
           <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
-          <div main-title>Trend Buddy</div>
+          <div id="title" main-title>Trend Buddy</div>
         </app-toolbar>
       </app-header>
 
-      <div id="curve_chart"></div>
+      <div id="curve_chart">yo hoh oh</div>
 
     </app-header-layout>
   </app-drawer-layout>
