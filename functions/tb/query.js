@@ -122,7 +122,7 @@ class Query
         Trend.Calc_Chart_Vals_By_Query(db, query, Calc_OK);
         function Calc_OK(vals)
         {
-          var key = "Select_Chart_Vals_By_Query_Id_" + query.id;
+          var key = "Select_Chart_Vals_By_Query_" + query.id;
           db.Insert_In_Cache2(key, vals, Cache_Insert_OK);
           function Cache_Insert_OK()
           {
