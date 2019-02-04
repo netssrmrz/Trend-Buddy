@@ -37,6 +37,18 @@
       src: url(fonts/Roboto-Regular.ttf);
     }
 
+    @font-face
+    {
+      font-family: roboto-light;
+      src: url(fonts/Roboto-Light.ttf);
+    }
+
+    @font-face
+    {
+      font-family: roboto-thin;
+      src: url(fonts/Roboto-Thin.ttf);
+    }
+
     #blogger
     {
       margin: -2px;
@@ -45,19 +57,19 @@
     #signature
     {
       font-size: 14px;
-      color: gray;
+      color: #00ff00;
       text-align: right;
     }
 
     #signature a
     {
-      color: gray;
+      color: #00ff00;
       text-decoration: none;
     }
 
     #signature a:visited
     {
-      color: gray;
+      color: #00ff00;
       text-decoration: none;
     }
 
@@ -68,7 +80,10 @@
 
     body
     {
-      font-family: roboto;
+      font-family: roboto-light;
+      color: #00ff00;
+      background-color: black;
+      text-shadow: #00ff00 0px 0px 10px, #00ff00 0px 0px 10px;
     }
 
     #title
@@ -78,15 +93,28 @@
 
     #header
     {
-      color: black;
-      background-color: white;
     }
 
     #query_items
     {
       height: 100%;
       overflow: auto;
-      background-color: lightgreen;
+      background-color: black;
+    }
+
+    #query_items::-webkit-scrollbar
+    {
+      width: 1em;
+    }
+
+    #query_items::-webkit-scrollbar-track
+    {
+      background-color: #002200;
+    }
+
+    #query_items::-webkit-scrollbar-thumb
+    {
+      background-color: #00aa00;
     }
 
     .menu_items
@@ -107,12 +135,11 @@
 
     .menu_items a:hover iron-icon
     {
-      color: #00cc00;
     }
 
     .menu_items a
     {
-      font-weight: 500;
+      font-family: roboto-light;
       font-size: 14px;
       display: block;
       padding: 10px 20px 10px 20px;
@@ -120,8 +147,7 @@
 
     .menu_items a:hover
     {
-      background-color: #f5f5f5;
-      color: #00cc00;
+      background-color: #004400;
       cursor: pointer;
     }
 
@@ -142,10 +168,24 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: radial-gradient(circle, rgba(220,220,220,0.9) 2%, rgba(0,0,0,0.2) 20%);
+      background: radial-gradient(circle, rgba(0,0,0,1) 2%, rgba(0,0,0,0.4) 60%);
       align-items: center;
       justify-content: center;
       display: none;
+    }
+
+    paper-checkbox
+    {
+      --paper-checkbox-unchecked-color: #00ff00;
+      --paper-checkbox-checked-color: #00ff00; 
+      --paper-checkbox-checkmark-color: #000000;
+    }
+
+    div.google-visualization-tooltip
+    {
+      background-color: #000000;
+      border: 1px solid #00ff00;
+      box-shadow: none;
     }
   </style>
 
@@ -290,12 +330,32 @@
         legend:
         {
           position: "top",
-          textStyle: { fontName: "roboto", fontSize: 14 }
+          textStyle: { fontName: "roboto", fontSize: 14, color: "#00ff00" }
         },
         animation: { startup: false, duration: 0, easing: 'linear', },
         interpolateNulls: true,
         fontName: "roboto",
-        fontSize: 9
+        fontSize: 9,
+        backgroundColor: "#000000",
+        vAxis:
+        {
+          baselineColor: "#002200",
+          gridlines: { color: "#002200" },
+          minorGridlines: { color: "#002200" },
+          textStyle: { color: "#00ff00" }
+        },
+        hAxis:
+        {
+          baselineColor: "#002200",
+          gridlines: { color: "#002200" },
+          minorGridlines: { color: "#002200" },
+          textStyle: { color: "#00ff00" }
+        },
+        tooltip:
+        {
+          textStyle: { color: "#00ff00" },
+          isHtml: true
+        }
       };
       document.getElementById("curve_chart").chart.draw(data_table, options);
     }
@@ -434,13 +494,14 @@
 
       <div id="curve_chart">
         <p>Everybody needs buddies. This one is no exception.</p>
-        <p>Every day, Trend Buddy takes note of the number of jobs posted for each of the "tech" areas listed on the left.
-        Armed with this information, Trend Buddy can chart the demand for work across these areas. 
+        <p>Every day, Trend Buddy takes note of the number of jobs posted demanding experience with various technologies.
+        This, in turn, is used to generate comparative charts. 
         If, like me, you're an IT professional you might find this information helpful when determining which skills are worth pursuing. 
         Each chart, individually, is not overly useful but when combined with others can give us some insight into which technologies are in demand and which are on the way out.</p>
-        <p>Use the green tech list, on the left, to view job charts. 
+        <p>Use the tech list, on the left, to view job charts. 
         To view a chart relating to a single tech just click on the appropriate tech title. 
         To view a chart combining several tech charts use the checkboxes.</p>
+        <p>Also, Trend Buddy works best with Chrome.</p>
         <p id="signature">- <a href="https://www.linkedin.com/in/esteban-ramirez-91a66b14/">Esteban (Steven) Ramirez</a>
         <a href="https://www.linkedin.com/in/esteban-ramirez-91a66b14" target="_blank"><img src="/images/In-2C-14px.png" /></a>
         <a href="http://ramirezsystems.blogspot.com" target="_blank"><img id="blogger" src="/images/icons8-blogger-18.png" /></a></p>
