@@ -21,6 +21,7 @@
     import '/polymer/app-layout/app-header/app-header.js';
     import '/polymer/app-layout/app-toolbar/app-toolbar.js';
     import '/tb-elements/query-editor.js';
+    import '/polymer/paper-toggle-button/paper-toggle-button.js';
   </script>
 
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -181,6 +182,17 @@
       --paper-checkbox-checkmark-color: #000000;
     }
 
+    paper-toggle-button
+    {
+      --paper-toggle-button-checked-bar-color: #00ff00;
+      --paper-toggle-button-checked-button-color: #00ff00;
+      --paper-toggle-button-checked-ink-color: #00ff00;
+      --paper-toggle-button-unchecked-bar-color: #ff0000;
+      --paper-toggle-button-unchecked-button-color: #ff0000;
+      --paper-toggle-button-unchecked-ink-color: #ff0000;
+      --paper-toggle-button-label-color: #00ff00;
+    }
+
     div.google-visualization-tooltip
     {
       background-color: #000000;
@@ -192,14 +204,52 @@
   <script>
     var db, chart_data;
 
+    // Events =====================================================================================
+
     window.onload = Main;
     function Main()
     {
+      var toggle_elem;
+
       db = new Db();
 
       List_Query_Items();
       Init_Chart();
+
+      toggle_elem = document.getElementById("rel_button");
+      toggle_elem.onclick = On_Relative_Click;
     }
+
+    function On_Choose_Chart(event)
+    {
+      var is_relative;
+
+      is_relative = document.getElementById("rel_button").checked;
+
+      event.stopPropagation();
+      if (this.checked)
+        Draw_Chart_By_Query_Id(db, this.query.id, false, is_relative);
+      else
+        Hide_Chart(this.query, is_relative);
+    }
+
+    function On_Show_Chart()
+    {
+      var is_relative;
+
+      is_relative = document.getElementById("rel_button").checked;
+
+      Uncheck_All_Queries();
+      document.getElementById("query_chk_" + this.query.id).checked = true;
+      Draw_Chart_By_Query_Id(db, this.query.id, true, is_relative);
+    }
+
+    function On_Relative_Click()
+    {
+      Draw_Chart(chart_data, this.checked);
+    }
+
+    // UI =========================================================================================
 
     function Init_Chart()
     {
@@ -248,22 +298,6 @@
       }
     }
 
-    function On_Choose_Chart(event)
-    {
-      event.stopPropagation();
-      if (this.checked)
-        Draw_Chart_By_Query_Id(db, this.query.id, false);
-      else
-        Hide_Chart(this.query);
-    }
-
-    function On_Show_Chart()
-    {
-      Uncheck_All_Queries();
-      document.getElementById("query_chk_" + this.query.id).checked = true;
-      Draw_Chart_By_Query_Id(db, this.query.id, true);
-    }
-
     function Uncheck_All_Queries()
     {
       var chk_elems, i;
@@ -273,7 +307,7 @@
         chk_elems[i].checked = false;
     }
 
-    function Draw_Chart_By_Query_Id(db, id, single_query)
+    function Draw_Chart_By_Query_Id(db, id, single_query, is_relative)
     {
       document.getElementById("wait_dlg").style.display = "flex";
       Query.Select_Obj(db, id, Select_Obj_OK);
@@ -291,7 +325,7 @@
             else
               Merge_Data(chart_data, data_vals);
 
-            Draw_Chart();
+            Draw_Chart(chart_data, is_relative);
           }
 
           document.getElementById("wait_dlg").style.display = "none";
@@ -299,7 +333,7 @@
       }
     }
 
-    function Hide_Chart(query)
+    function Hide_Chart(query, is_relative)
     {
       var i, col_idx, new_data;
 
@@ -316,14 +350,19 @@
       }
       chart_data = new_data;
 
-      Draw_Chart();
+      Draw_Chart(chart_data, is_relative);
     }
 
-    function Draw_Chart()
+    function Draw_Chart(chart_data, is_relative)
     {
-      var data_table, options;
+      var data_table, options, draw_data;
 
-      data_table = google.visualization.arrayToDataTable(chart_data);
+      if (is_relative)
+        draw_data = To_Relative_Data(chart_data);
+      else
+        draw_data = chart_data;
+
+      data_table = google.visualization.arrayToDataTable(draw_data);
       options = {
         curveType: 'line',
         chartArea: { width: "90%", height: "80%" },
@@ -358,6 +397,76 @@
         }
       };
       document.getElementById("curve_chart").chart.draw(data_table, options);
+    }
+
+    // Data Manipulation ==========================================================================
+
+    function To_Relative_Data(chart_data)
+    {
+      var row, col, rel_data = [], row_data, row_tot;
+
+      rel_data.push(chart_data[0]);
+      for (row = 1; row < chart_data.length; row++)
+      {
+        row_data = New_Filled_Row(chart_data, row);
+        row_tot = Calc_Row_Total(row_data);
+        for (col = 1; col < row_data.length; col++)
+        {
+          if (row_data[col]!=null)
+            row_data[col] = row_data[col] / row_tot * 100;
+        }
+        rel_data.push(row_data);
+      }
+
+      return rel_data;
+    }
+
+    function New_Filled_Row(chart_data, row_index)
+    {
+      var col, new_row, curr_row;
+
+      curr_row = chart_data[row_index];
+
+      new_row = [];
+      new_row.push(curr_row[0]);
+
+      for (col = 1; col < curr_row.length; col++)
+      {
+        if (curr_row[col] == null)
+          new_row.push(Find_Prev_Val(chart_data, row_index-1, col));
+        else
+          new_row.push(curr_row[col]);
+      }
+
+      return new_row;
+    }
+
+    function Find_Prev_Val(chart_data, row_index, col_index)
+    {
+      var row, val = null;
+
+      for (row = row_index; row > 0; row--)
+      {
+        if (chart_data[row][col_index] != null)
+        {
+          val = chart_data[row][col_index];
+          break;
+        }
+      }
+
+      return val;
+    }
+
+    function Calc_Row_Total(row_data)
+    {
+      var col, tot=0;
+
+      for (col = 1; col < row_data.length; col++)
+      {
+        tot += row_data[col];
+      }
+
+      return tot;
     }
 
     function Row_Has_Data(row)
@@ -489,6 +598,7 @@
         <app-toolbar>
           <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
           <div id="title" main-title>Trend Buddy</div>
+          <paper-toggle-button id="rel_button">Relative</paper-toggle-button>
         </app-toolbar>
       </app-header>
 
