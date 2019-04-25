@@ -12,7 +12,22 @@ class Query
 
   static Select_Objs(db, on_success_fn)
   {
-    //console.log("Query.Select_Objs");
+    var key;
+
+    key = "Query-Select_Objs";
+    db.If_Not_In_Cache2(key, Get_Vals, null, on_success_fn);
+    function Get_Vals()
+    {
+      Query.Select_Objs_No_Cache(db, Select_OK);
+      function Select_OK(objs)
+      {
+        db.Insert_In_Cache2(key, objs, on_success_fn);
+      }
+    }
+  }
+
+  static Select_Objs_No_Cache(db, on_success_fn)
+  {
     db.Select_Objs("/query", Select_OK);
     function Select_OK(objs)
     {
