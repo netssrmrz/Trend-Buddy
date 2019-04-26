@@ -222,15 +222,27 @@
 
     function On_Choose_Chart(event)
     {
-      var is_relative;
+      var rel_elem;
 
-      is_relative = document.getElementById("rel_button").checked;
+      rel_elem = document.getElementById("rel_button");
 
       event.stopPropagation();
       if (this.checked)
-        Draw_Chart_By_Query_Id(db, this.query.id, false, is_relative);
+      {
+        Draw_Chart_By_Query_Id(db, this.query.id, false, rel_elem.checked);
+      }
+      else if (Charts_Displayed(chart_data) > 1)
+      {
+        if (Charts_Displayed(chart_data) == 2)
+        {
+          rel_elem.checked = false;
+        }
+        Hide_Chart(this.query, rel_elem.checked);
+      }
       else
-        Hide_Chart(this.query, is_relative);
+      {
+        this.checked = true;
+      }
     }
 
     function On_Show_Chart()
@@ -246,6 +258,11 @@
 
     function On_Relative_Click()
     {
+      if (Charts_Displayed(chart_data) < 2 && this.checked)
+      {
+        this.checked = false;
+      }
+
       Draw_Chart(chart_data, this.checked);
     }
 
@@ -401,6 +418,16 @@
 
     // Data Manipulation ==========================================================================
 
+    function Charts_Displayed(chart_data)
+    {
+      var res = 0;
+
+      if (chart_data && chart_data.length > 0 && chart_data[0].length > 1)
+        res = chart_data[0].length - 1;
+
+      return res;
+    }
+
     function To_Relative_Data(chart_data)
     {
       var row, col, rel_data = [], row_data, row_tot;
@@ -412,8 +439,12 @@
         row_tot = Calc_Row_Total(row_data);
         for (col = 1; col < row_data.length; col++)
         {
-          if (row_data[col]!=null)
+          if (row_data[col] != null)
+          {
             row_data[col] = row_data[col] / row_tot * 100;
+            if (row_data[col] == 100)
+              row_data[col] = null;
+          }
         }
         rel_data.push(row_data);
       }
