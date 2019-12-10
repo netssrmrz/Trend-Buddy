@@ -222,22 +222,18 @@
 
     function On_Choose_Chart(event)
     {
-      var rel_elem;
-
-      rel_elem = document.getElementById("rel_button");
-
       event.stopPropagation();
       if (this.checked)
       {
-        Draw_Chart_By_Query_Id(db, this.query.id, false, rel_elem.checked);
+        Draw_Chart_By_Query_Id(db, this.query.id, false, Is_Relative_Chart());
       }
       else if (Charts_Displayed(chart_data) > 1)
       {
         if (Charts_Displayed(chart_data) == 2)
         {
-          rel_elem.checked = false;
+          Set_Absolute_Chart();
         }
-        Hide_Chart(this.query, rel_elem.checked);
+        Hide_Chart(this.query, Is_Relative_Chart());
       }
       else
       {
@@ -247,23 +243,20 @@
 
     function On_Show_Chart()
     {
-      var is_relative;
-
-      is_relative = document.getElementById("rel_button").checked;
-
+      Set_Absolute_Chart();
       Uncheck_All_Queries();
       document.getElementById("query_chk_" + this.query.id).checked = true;
-      Draw_Chart_By_Query_Id(db, this.query.id, true, is_relative);
+      Draw_Chart_By_Query_Id(db, this.query.id, true, false);
     }
 
-    function On_Relative_Click()
+    async function On_Relative_Click()
     {
-      if (Charts_Displayed(chart_data) < 2 && this.checked)
+      if (Charts_Displayed(chart_data) < 2 && Is_Relative_Chart())
       {
-        this.checked = false;
+        Set_Absolute_Chart();
       }
 
-      Draw_Chart(chart_data, this.checked);
+      Draw_Chart(chart_data, Is_Relative_Chart());
     }
 
     // UI =========================================================================================
@@ -287,13 +280,17 @@
 
     function List_Query_Items()
     {
+      //const start_time = Date.now();
       Query.Select_Objs(db, Have_Query_Objs);
       function Have_Query_Objs(queries)
       {
-        alert("have data");
+        //const stop_time = Date.now();
+        //console.log("index.List_Query_Items(): load time (ms) =", stop_time - start_time)
+        
         var c, list_elem;
 
         list_elem = document.getElementById("query_items");
+        Clear_Elems(list_elem);
 
         for (c = 0; c < queries.length; c++)
         {
@@ -415,6 +412,24 @@
         }
       };
       document.getElementById("curve_chart").chart.draw(data_table, options);
+    }
+
+    function Is_Relative_Chart()
+    {
+      return document.getElementById("rel_button").checked;
+    }
+
+    function Set_Absolute_Chart()
+    {
+      document.getElementById("rel_button").checked = false;
+    }
+
+    function Clear_Elems(elem)
+    {
+      while (elem.firstChild) 
+      {
+        elem.removeChild(elem.firstChild);
+      }
     }
 
     // Data Manipulation ==========================================================================
@@ -622,7 +637,9 @@
   <app-drawer-layout>
 
     <app-drawer slot="drawer">
-      <div id="query_items" class="menu_items"></div>
+      <div id="query_items" class="menu_items">
+        <a>Loading Menu...</a>
+      </div>
     </app-drawer>
 
     <app-header-layout>
