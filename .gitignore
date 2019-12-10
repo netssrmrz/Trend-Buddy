@@ -52,3 +52,5 @@ Temporary Items
 /.vs
 /functions/package-lock.json
 /package-lock.json
+public/.vs/public
+.firebase

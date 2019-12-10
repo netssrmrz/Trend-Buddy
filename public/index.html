@@ -287,8 +287,8 @@
 
     function List_Query_Items()
     {
-      Query.Select_Objs(db, Select_OK);
-      function Select_OK(queries)
+      Query.Select_Objs(db, Have_Query_Objs);
+      function Have_Query_Objs(queries)
       {
         var c, list_elem;
 
@@ -330,8 +330,8 @@
       Query.Select_Obj(db, id, Select_Obj_OK);
       function Select_Obj_OK(query)
       {
-        Trend.Select_Chart_Vals_By_Query(db, query, Select_OK);
-        function Select_OK(data_vals)
+        Trend.Select_Chart_Vals_By_Query(db, query, Have_Trend_Objs);
+        function Have_Trend_Objs(data_vals)
         {
           if (Util.Empty(data_vals))
             document.getElementById("no_data").show();
