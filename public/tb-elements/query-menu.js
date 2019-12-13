@@ -96,19 +96,3 @@ class QueryMenu extends PolymerElement
   }
 }
 customElements.define('query-menu', QueryMenu);
-
-function Clear_Elems(elem)
-{
-  while (elem.firstChild) 
-  {
-    if (!Is_Style_Elem(elem))
-    {
-      elem.removeChild(elem.firstChild);
-    }
-  }
-}
-
-function Is_Style_Elem(elem)
-{
-  return elem.innerHTML.startsWith("<style");
-}
