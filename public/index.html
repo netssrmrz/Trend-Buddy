@@ -14,13 +14,13 @@
     import '/polymer/iron-icons/iron-icons.js';
     import '/polymer/paper-toast/paper-toast.js';
     import '/polymer/paper-spinner/paper-spinner.js';
-    import '/polymer/paper-checkbox/paper-checkbox.js';
     import '/polymer/app-layout/app-drawer-layout/app-drawer-layout.js';
     import '/polymer/app-layout/app-drawer/app-drawer.js';
     import '/polymer/app-layout/app-header-layout/app-header-layout.js';
     import '/polymer/app-layout/app-header/app-header.js';
     import '/polymer/app-layout/app-toolbar/app-toolbar.js';
     import '/tb-elements/query-editor.js';
+    import '/tb-elements/query-menu.js';
     import '/polymer/paper-toggle-button/paper-toggle-button.js';
   </script>
 
@@ -92,10 +92,6 @@
       font-size: 30px;
     }
 
-    #header
-    {
-    }
-
     #query_items
     {
       height: 100%;
@@ -116,40 +112,6 @@
     #query_items::-webkit-scrollbar-thumb
     {
       background-color: #00aa00;
-    }
-
-    .menu_items
-    {
-    }
-
-    .menu_items iron-icon
-    {
-      color: #616161;
-      margin-right: 20px;
-      vertical-align: text-bottom;
-    }
-
-    .menu_items paper-checkbox
-    {
-      float: right;
-    }
-
-    .menu_items a:hover iron-icon
-    {
-    }
-
-    .menu_items a
-    {
-      font-family: roboto-light;
-      font-size: 14px;
-      display: block;
-      padding: 10px 20px 10px 20px;
-    }
-
-    .menu_items a:hover
-    {
-      background-color: #004400;
-      cursor: pointer;
     }
 
     #curve_chart
@@ -173,13 +135,6 @@
       align-items: center;
       justify-content: center;
       display: none;
-    }
-
-    paper-checkbox
-    {
-      --paper-checkbox-unchecked-color: #00ff00;
-      --paper-checkbox-checked-color: #00ff00; 
-      --paper-checkbox-checkmark-color: #000000;
     }
 
     paper-toggle-button
@@ -209,11 +164,12 @@
     window.onload = Main;
     function Main()
     {
-      var toggle_elem;
+      var toggle_elem, menu_elem;
 
       db = new Db();
 
-      List_Query_Items();
+      menu_elem = document.getElementById("query_menu");
+      menu_elem.List_Query_Items(db, On_Show_Chart, On_Choose_Chart);
       Init_Chart();
 
       toggle_elem = document.getElementById("rel_button");
@@ -241,11 +197,11 @@
       }
     }
 
-    function On_Show_Chart()
+    function On_Show_Chart(event)
     {
       Set_Absolute_Chart();
-      Uncheck_All_Queries();
-      document.getElementById("query_chk_" + this.query.id).checked = true;
+      query_menu.Uncheck_All_Queries();
+      this.querySelector("#query_chk_" + this.query.id).checked = true;
       Draw_Chart_By_Query_Id(db, this.query.id, true, false);
     }
 
@@ -276,50 +232,6 @@
         chart = new google.visualization.LineChart(chart_elem);
         chart_elem.chart = chart;
       }
-    }
-
-    function List_Query_Items()
-    {
-      //const start_time = Date.now();
-      Query.Select_Objs(db, Have_Query_Objs);
-      function Have_Query_Objs(queries)
-      {
-        //const stop_time = Date.now();
-        //console.log("index.List_Query_Items(): load time (ms) =", stop_time - start_time)
-        
-        var c, list_elem;
-
-        list_elem = document.getElementById("query_items");
-        Clear_Elems(list_elem);
-
-        for (c = 0; c < queries.length; c++)
-        {
-          var item_elem, query, chk_elem;
-
-          query = queries[c];
-          item_elem = document.createElement("a");
-          item_elem.text = query.title;
-          item_elem.query = query;
-          item_elem.onclick = On_Show_Chart;
-
-          chk_elem = document.createElement("paper-checkbox");
-          chk_elem.id = "query_chk_" + query.id;
-          chk_elem.query = query;
-          chk_elem.onclick = On_Choose_Chart;
-          item_elem.appendChild(chk_elem);
-
-          list_elem.appendChild(item_elem);
-        }
-      }
-    }
-
-    function Uncheck_All_Queries()
-    {
-      var chk_elems, i;
-
-      chk_elems = document.querySelectorAll("#query_items paper-checkbox");
-      for (i = 0; i < chk_elems.length; i++)
-        chk_elems[i].checked = false;
     }
 
     function Draw_Chart_By_Query_Id(db, id, single_query, is_relative)
@@ -422,14 +334,6 @@
     function Set_Absolute_Chart()
     {
       document.getElementById("rel_button").checked = false;
-    }
-
-    function Clear_Elems(elem)
-    {
-      while (elem.firstChild) 
-      {
-        elem.removeChild(elem.firstChild);
-      }
     }
 
     // Data Manipulation ==========================================================================
@@ -637,9 +541,7 @@
   <app-drawer-layout>
 
     <app-drawer slot="drawer">
-      <div id="query_items" class="menu_items">
-        <a>Loading Menu...</a>
-      </div>
+      <query-menu id="query_menu"></query-menu>
     </app-drawer>
 
     <app-header-layout>
