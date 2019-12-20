@@ -1,5 +1,5 @@
 ﻿import { PolymerElement, html } from '/polymer/polymer/polymer-element.js';
-import '/polymer/paper-checkbox/paper-checkbox.js';
+import { QueryMenuItem } from '/tb-elements/query-menu-item.js';
 
 class QueryMenu extends PolymerElement
 {
@@ -7,45 +7,40 @@ class QueryMenu extends PolymerElement
   {
     return html`
       <style>
-        :host
+        @font-face
         {
-          xbackground-color: black;
+          font-family: roboto-light;
+          src: url(fonts/Roboto-Light.ttf);
+        }
+
+        #menu_items::-webkit-scrollbar
+        {
+          width: 1em;
         }
     
+        #menu_items::-webkit-scrollbar-track
+        {
+          background-color: #002200;
+        }
+    
+        #menu_items::-webkit-scrollbar-thumb
+        {
+          background-color: #00aa00;
+        }
+
         #menu_items
         {
           overflow: auto;
           height: 100%;
         }
-
-        iron-icon
-        {
-          color: #616161;
-          margin-right: 20px;
-          vertical-align: text-bottom;
-        }
     
-        a
+        #load_msg
         {
           font-family: roboto-light;
           font-size: 14px;
           display: block;
           padding: 10px 20px 10px 20px;
           background-color: black;
-        }
-    
-        a:hover
-        {
-          background-color: #004400;
-          cursor: pointer;
-        }
-
-        paper-checkbox
-        {
-          float: right;
-          --paper-checkbox-unchecked-color: #00ff00;
-          --paper-checkbox-checked-color: #00ff00; 
-          --paper-checkbox-checkmark-color: #000000;
         }
       </style>
 
@@ -57,30 +52,18 @@ class QueryMenu extends PolymerElement
   List_Query_Items(db, On_Show_Chart, On_Choose_Chart)
   {
     Have_Query_Objs = Have_Query_Objs.bind(this);
-    Query.Select_Objs(db, Have_Query_Objs);
+    Query.Select_Root_Objs(db, Have_Query_Objs);
     function Have_Query_Objs(queries)
     {
-      var c, list_elem;
+      var c, list_elem, query, item_elem;
 
       list_elem = this.$.menu_items;
       this.$.load_msg.style.display = "none";
 
       for (c = 0; c < queries.length; c++)
       {
-        var item_elem, query, chk_elem;
-
         query = queries[c];
-        item_elem = document.createElement("a");
-        item_elem.text = query.title;
-        item_elem.query = query;
-        item_elem.onclick = On_Show_Chart;
-
-        chk_elem = document.createElement("paper-checkbox");
-        chk_elem.id = "query_chk_" + query.id;
-        chk_elem.query = query;
-        chk_elem.onclick = On_Choose_Chart;
-        item_elem.appendChild(chk_elem);
-
+        item_elem = new QueryMenuItem(query, On_Show_Chart, On_Choose_Chart);
         list_elem.appendChild(item_elem);
       }
     }
