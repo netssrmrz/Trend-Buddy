@@ -139,17 +139,25 @@ class Query
     Query.Select_Objs(db, Select_Objs_OK);
     function Select_Objs_OK(queries)
     {
-      var c, todo = queries.length;
+      var c, todo = queries.length, query;
 
       for (c = 0; c < queries.length; c++)
       {
-        Query.Insert_Trend(db, queries[c], Insert_From_Query_OK);
-        function Insert_From_Query_OK(query, trend, vals)
+        query = queries[c];
+        if (!Util.Empty(query.terms))
         {
-          console.log("Query.Insert_Trends: Query \""+query.title+"\" updated with new value \""+trend.count+"\" for a total of "+vals.length+" values");
-          todo--;
-          if (todo == 0 && on_success_fn != null)
-            on_success_fn();
+          Query.Insert_Trend(db, query, Insert_From_Query_OK);
+          function Insert_From_Query_OK(query, trend, vals)
+          {
+            console.log("Query.Insert_Trends: Query \""+query.title+"\" updated with new value \""+trend.count+"\" for a total of "+vals.length+" values");
+            todo--;
+            if (todo == 0 && on_success_fn != null)
+              on_success_fn();
+          }
+        }
+        else
+        {
+          console.log("Query.Insert_Trends: Query \""+query.title+"\" skipped due to missing query string");
         }
       }
     }
