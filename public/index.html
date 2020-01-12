@@ -14,14 +14,16 @@
     import '/polymer/iron-icons/iron-icons.js';
     import '/polymer/paper-toast/paper-toast.js';
     import '/polymer/paper-spinner/paper-spinner.js';
+    import '/polymer/paper-checkbox/paper-checkbox.js';
     import '/polymer/app-layout/app-drawer-layout/app-drawer-layout.js';
     import '/polymer/app-layout/app-drawer/app-drawer.js';
     import '/polymer/app-layout/app-header-layout/app-header-layout.js';
     import '/polymer/app-layout/app-header/app-header.js';
     import '/polymer/app-layout/app-toolbar/app-toolbar.js';
     import '/tb-elements/query-editor.js';
-    import '/tb-elements/query-menu.js';
+    import '/tb-elements/query-menu-item.js';
     import '/polymer/paper-toggle-button/paper-toggle-button.js';
+    import '/polymer/iron-collapse/iron-collapse.js';
   </script>
 
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -124,6 +126,16 @@
       margin: 0px 50px 25px 50px;
     }
 
+    #curve_chart ul
+    {
+      margin: 0px 50px 25px 50px;
+    }
+
+    #curve_chart li
+    {
+      margin: 0px 0px 10px 0px;
+    }
+
     .overlay
     {
       position: fixed;
@@ -154,6 +166,28 @@
       border: 1px solid #00ff00;
       box-shadow: none;
     }
+    
+    #menu_items::-webkit-scrollbar
+    {
+      width: 1em;
+    }
+
+    #menu_items::-webkit-scrollbar-track
+    {
+      background-color: #002200;
+    }
+
+    #menu_items::-webkit-scrollbar-thumb
+    {
+      background-color: #00aa00;
+    }
+
+    #menu_items
+    {
+      overflow: auto;
+      height: 100%;
+    }
+
   </style>
 
   <script>
@@ -168,8 +202,13 @@
 
       db = new Db();
 
-      menu_elem = document.getElementById("query_menu");
-      menu_elem.List_Query_Items(db, On_Show_Chart, On_Choose_Chart);
+      menu_elem = document.createElement("query-menu-item");
+      menu_elem.id = "query_menu";
+      menu_elem.db = db;
+      menu_elem.On_Show_Chart = On_Show_Chart;
+      menu_elem.On_Choose_Chart = On_Choose_Chart;
+      menu_items.append(menu_elem);
+
       Init_Chart();
 
       toggle_elem = document.getElementById("rel_button");
@@ -200,8 +239,8 @@
     function On_Show_Chart(event)
     {
       Set_Absolute_Chart();
-      query_menu.Uncheck_All_Queries();
-      this.querySelector("#query_chk_" + this.query.id).checked = true;
+      query_menu.Uncheck();
+      this.querySelector("#checkbox").checked = true;
       Draw_Chart_By_Query_Id(db, this.query.id, true, false);
     }
 
@@ -540,8 +579,8 @@
 
   <app-drawer-layout>
 
-    <app-drawer slot="drawer">
-      <query-menu id="query_menu"></query-menu>
+    <app-drawer id="menu_drawer" slot="drawer">
+      <div id="menu_items"></div>
     </app-drawer>
 
     <app-header-layout>
@@ -554,15 +593,23 @@
       </app-header>
 
       <div id="curve_chart">
-        <p>Everybody needs good buddies.</p>
         <p>Every day, Trend Buddy takes note of the number of jobs posted demanding experience with various technologies.
         This, in turn, is used to generate comparative charts. 
         If, like me, you're an IT professional you might find this information helpful when determining which skills are worth pursuing. 
         Each chart, individually, is not overly useful but when combined with others can give us some insight into which technologies are in demand and which are on the way out.</p>
-        <p>Use the tech list, on the left, to view job charts. 
-        To view a chart relating to a single tech just click on the appropriate tech title. 
-        To view a chart combining several tech charts use the checkboxes.</p>
-        <p>Also, Trend Buddy works best with Chrome.</p>
+        
+        <ul>
+          <li>To view job requests for a single tech just click on the appropriate tech title.</li>
+          <li>To compare several tech charts use the checkboxes.</li>
+          <li>To compare several techs in a relative way so that each tech point no longer represents the
+            exact number of jobs found but rather, the percentage of jobs out of the total for all the included
+            techs, use the "Relative" switch on the top-right of the page.</li>
+          </ul>
+
+        <p>Also, Trend Buddy has only been tested on Chrome.</p>
+
+        <p>FYI: Tech used includes VS Code, Javascript, Polymer, Firebase, Google App Engine, Node, and Java.</p>
+
         <p id="signature">- <a href="https://www.linkedin.com/in/esteban-ramirez-91a66b14/">Esteban (Steven) Ramirez</a>
         <a href="https://www.linkedin.com/in/esteban-ramirez-91a66b14" target="_blank"><img src="/images/In-2C-14px.png" /></a>
         <a href="http://ramirezsystems.blogspot.com" target="_blank"><img id="blogger" src="/images/icons8-blogger-18.png" /></a></p>
