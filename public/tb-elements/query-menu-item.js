@@ -47,20 +47,19 @@ export class QueryMenuItem extends PolymerElement
         {
           padding-left: 15px;
         }
+
+        paper-icon-button
+        {
+          float: right;
+          padding: 0px;
+          width: 26px;
+          height: 26px;
+          margin: -4px 4px 0px 0px;
+        }
       </style>
 
       <a id="item"><span id="title"></span></a>
     `;
-  }
-
-  constructor(db, query, On_Show_Chart, On_Choose_Chart)
-  {
-    super();
-    this.db = db;
-    this.query = query;
-    this.On_Show_Chart = On_Show_Chart;
-    this.On_Choose_Chart = On_Choose_Chart;
-    this.is_menu = false;
   }
 
   ready() 
@@ -119,19 +118,29 @@ export class QueryMenuItem extends PolymerElement
 
   Render_Items(child_queries)
   {
-    this.$.item.onclick = this.On_Toggle_Menu.bind(this);
+    const stats_elem = document.createElement("paper-icon-button");
+    stats_elem.icon = "trending-up";
+    stats_elem.onclick = this.On_Choose_Trend.bind(this);
 
     const list_elem = document.createElement("iron-collapse");
     list_elem.id = "list";
     this.$.item.parentNode.append(list_elem);
     this.$.list_elem = list_elem;
 
+    this.$.item.onclick = this.On_Toggle_Menu.bind(this);
+    this.$.item.append(stats_elem);
+
     var c;
 
     for (c = 0; c < child_queries.length; c++)
     {
       const child_query = child_queries[c];
-      const item_elem = new QueryMenuItem(this.db, child_query, this.On_Show_Chart, this.On_Choose_Chart);
+      const item_elem = document.createElement("query-menu-item");
+      item_elem.db = db;
+      item_elem.query = child_query;
+      item_elem.On_Show_Chart = On_Show_Chart;
+      item_elem.On_Choose_Chart = On_Choose_Chart;
+      item_elem.On_Choose_Trend = On_Choose_Trend;
       list_elem.appendChild(item_elem);
     }
   }

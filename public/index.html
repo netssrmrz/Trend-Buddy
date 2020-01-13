@@ -207,12 +207,19 @@
       menu_elem.db = db;
       menu_elem.On_Show_Chart = On_Show_Chart;
       menu_elem.On_Choose_Chart = On_Choose_Chart;
+      menu_elem.On_Choose_Trend = On_Choose_Trend;
       menu_items.append(menu_elem);
 
       Init_Chart();
 
       toggle_elem = document.getElementById("rel_button");
       toggle_elem.onclick = On_Relative_Click;
+    }
+
+    function On_Choose_Trend(event)
+    {
+      alert("yo");
+      event.stopPropagation();
     }
 
     function On_Choose_Chart(event)
