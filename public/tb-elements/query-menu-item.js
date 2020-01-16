@@ -85,11 +85,11 @@ export class QueryMenuItem extends PolymerElement
 
   async Render_Query(query_id)
   {
-    const child_queries = await Query.Select_Child_Objs(this.db, query_id);
-    if (child_queries && child_queries.length > 0)
+    this.child_queries = await Query.Select_Child_Objs(this.db, query_id);
+    if (this.child_queries && this.child_queries.length > 0)
     {
       this.is_menu = true;
-      this.Render_Items(child_queries);
+      this.Render_Items();
     }
     else
     {
@@ -116,7 +116,7 @@ export class QueryMenuItem extends PolymerElement
     this.$.item.append(checkbox_elem);
   }
 
-  Render_Items(child_queries)
+  Render_Items()
   {
     const stats_elem = document.createElement("paper-icon-button");
     stats_elem.icon = "trending-up";
@@ -132,9 +132,9 @@ export class QueryMenuItem extends PolymerElement
 
     var c;
 
-    for (c = 0; c < child_queries.length; c++)
+    for (c = 0; c < this.child_queries.length; c++)
     {
-      const child_query = child_queries[c];
+      const child_query = this.child_queries[c];
       const item_elem = document.createElement("query-menu-item");
       item_elem.db = db;
       item_elem.query = child_query;

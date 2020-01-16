@@ -17,42 +17,8 @@ class Db
     this.conn = firebase.database();
 
     this.use_cache = true;
+    this.use_db_cache = false;
     this.cache = [];
-  }
-
-  Exists_In_Cache(key)
-  {
-    var res = false;
-
-    if (this.cache[key] != null)
-      res = true;
-
-    return res;
-  }
-
-  Get_From_Cache(key)
-  {
-    return this.cache[key];
-  }
-
-  Insert_In_Cache(key, val)
-  {
-    this.cache[key] = val;
-  }
-
-  If_Not_In_Cache(key, get_val_fn, on_success_fn)
-  {
-    var val = null;
-
-    if (this.Exists_In_Cache(key))
-    {
-      val = this.Get_From_Cache(key);
-      on_success_fn(val);
-    }
-    else
-    {
-      get_val_fn();
-    }
   }
 
   Exists_In_Cache2(key, on_success_fn)
@@ -139,11 +105,59 @@ class Db
     }
   }
 
-  Delete_From_Cache(key, on_success_fn)
+  // Async cache ==================================================================================
+  
+  async Get_From_Cache(key)
   {
-    this.cache[key] = null;
-    this.conn.ref("/cache/" + key).remove(on_success_fn);
+    let res = { not_in_cache: true };
+
+    if (this.use_cache)
+    {
+      if (this.cache[key] != undefined)
+      {
+        res = this.cache[key];
+      }
+      else if (this.use_db_cache)
+      {
+        const query_res = await this.conn.ref("/cache/" + key).once('value');
+        const val = query_res.val();
+        if (val)
+        {
+          res = JSON.parse(val);
+          this.cache[key] = res;
+        }
+      }
+    }
+
+    return res;
   }
+
+  async Insert_In_Cache(key, val)
+  {
+    if (this.use_cache)
+    {
+      if (val == undefined)
+        val = null;
+      this.cache[key] = val;
+
+      if (this.use_db_cache)
+      {
+        await this.conn.ref("/cache/" + key).set(JSON.stringify(val));
+      }
+    }
+  }
+
+  async Delete_From_Cache(key)
+  {
+    this.cache[key] = undefined;
+
+    if (this.use_db_cache)
+    {
+      await this.conn.ref("/cache/" + key).remove();
+    }
+  }
+
+  // General data access ==========================================================================
 
   Select_Obj(path, on_success_fn)
   {
