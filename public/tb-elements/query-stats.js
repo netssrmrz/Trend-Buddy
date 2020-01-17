@@ -18,6 +18,8 @@ export class QueryStats extends PolymerElement
           display: inline-block;
           width: 250px;
           height: 180px;
+          xborder: 1px solid #f00;
+          overflow: hidden;
         }
 
         paper-spinner-lite

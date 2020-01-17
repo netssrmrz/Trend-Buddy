@@ -10,11 +10,13 @@
 
   <script src="/webcomponentsjs/webcomponents-loader.js"></script>
   <script type="module">
-    import '/polymer/paper-icon-button/paper-icon-button.js';
     import '/polymer/iron-icons/iron-icons.js';
+    import '/polymer/iron-collapse/iron-collapse.js';
+    import '/polymer/paper-icon-button/paper-icon-button.js';
     import '/polymer/paper-toast/paper-toast.js';
     import '/polymer/paper-spinner/paper-spinner.js';
     import '/polymer/paper-checkbox/paper-checkbox.js';
+    import '/polymer/paper-toggle-button/paper-toggle-button.js';
     import '/polymer/app-layout/app-drawer-layout/app-drawer-layout.js';
     import '/polymer/app-layout/app-drawer/app-drawer.js';
     import '/polymer/app-layout/app-header-layout/app-header-layout.js';
@@ -23,8 +25,8 @@
     import '/tb-elements/query-editor.js';
     import '/tb-elements/query-menu-item.js';
     import '/tb-elements/query-stats.js';
-    import '/polymer/paper-toggle-button/paper-toggle-button.js';
-    import '/polymer/iron-collapse/iron-collapse.js';
+    import '/tb-elements/query-rankings.js';
+    import '/tb-elements/query-weights.js';
   </script>
 
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -192,6 +194,7 @@
     #stats_elem
     {
       display: none;
+      margin-left: 20px;
     }
   </style>
 
@@ -226,6 +229,22 @@
       event.stopPropagation();
       Util.Clr(stats_elem);
 
+      // add rankings
+      const rank_elem = document.createElement("query-rankings");
+      rank_elem.db = db;
+      rank_elem.query = this.query;
+      rank_elem.child_queries = this.child_queries;
+      stats_elem.append(rank_elem);
+
+      // add pie chart
+      const weight_elem = document.createElement("query-weights");
+      weight_elem.db = db;
+      weight_elem.query = this.query;
+      weight_elem.child_queries = this.child_queries;
+      stats_elem.append(weight_elem);
+
+      stats_elem.append(document.createElement("br"));
+
       // add movement panels for each tech
       for (c=0; c<this.child_queries.length; c++)
       {
@@ -235,10 +254,6 @@
 
         stats_elem.append(stat_elem);
       }
-
-      // add rankings
-
-      // add pie chart
 
       Util.Hide(curve_chart);
       Util.Show(stats_elem);
@@ -648,8 +663,6 @@
       </div>
 
       <div id="stats_elem">
-        <div>Rankings</div>
-        <div>Pie Chart</div>
       </div>
 
     </app-header-layout>
