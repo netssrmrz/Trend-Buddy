@@ -1,4 +1,5 @@
 ﻿const http = require('http');
+const fetch = require('node-fetch');
 
 var web_components_ready = false;
 
@@ -20,6 +21,25 @@ class Util
           success_fn(JSON.parse(data));
       }
     }
+  }
+
+  static async Req_Json_Async(url)
+  {
+    let res = null;
+    const options = {
+      method: 'get',
+    };
+
+    const request = fetch(url, options);
+    const response = await request;
+    if (response.ok)
+    {
+      const response_text = await response.text();
+      res = JSON.parse(response_text);
+    }
+
+    return res;
+
   }
 
   static Clr_Child_Elems(elem, start)
@@ -147,6 +167,75 @@ class Util
     }
     else
       res = Util.No_Undef(val);
+
+    return res;
+  }
+
+  static Hide(elem)
+  {
+    elem.prev_style_display = elem.style.display;
+    elem.style.display = "none";
+  }
+
+  static Show(elem)
+  {
+    if (elem.prev_style_display)
+    {
+      elem.style.display = elem.prev_style_display;
+    }
+    else
+    {
+      elem.style.display = "block";
+    }
+  }
+
+  static Clr(elem)
+  {
+    while (elem.firstChild) 
+    {
+      elem.removeChild(elem.firstChild);
+    }
+  }
+
+  static Sort(items, field_name)
+  {
+    var res = null;
+
+    if (items && items.length > 0)
+    {
+      res = items.sort(Compare);
+    }
+  
+    return res;
+
+    function Compare(a, b)
+    {
+      var res, a_val, b_val;
+
+      a_val = a[field_name];
+      b_val = b[field_name];
+  
+      if (a_val && !b_val)
+        res = -1;
+      else if (!a_val && b_val)
+        res = 1;
+      else if (!a_val && !b_val)
+        res = 0;
+      else if (a_val < b_val)
+        res = -1;
+      else if (a_val > b_val)
+        res = 1;
+      else
+        res = 0;
+  
+      return res;
+    }
+  }
+
+  static To_Precision(val, precision)
+  {
+    const val_num = new Number(val);
+    const res = val_num.toPrecision(precision);
 
     return res;
   }

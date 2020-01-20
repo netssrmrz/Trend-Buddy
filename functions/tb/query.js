@@ -13,37 +13,44 @@ class Query
     this.parent_id = null;
   }
 
-  static Select_Objs(db, on_success_fn)
+  static async Select_Objs(db)
   {
-    //console.log("Query.Select_Objs");
-    db.Select_Objs("/query", Select_OK);
-    function Select_OK(objs)
+    var key, objs;
+
+    key = "Query-Select_Objs";
+    objs = await db.Get_From_Cache(key);
+    if (objs.not_in_cache)
     {
+      objs = await db.Select_Objs("/query");
       if (objs)
       {
-        objs.sort(Compare);
-        function Compare(a, b)
-        {
-          var res;
-
-          if (a.order && !b.order)
-            res = -1;
-          else if (!a.order && b.order)
-            res = 1;
-          else if (!a.order && !b.order)
-            res = 0;
-          else if (a.order < b.order)
-            res = -1;
-          else if (a.order > b.order)
-            res = 1;
-          else
-            res = 0;
-
-          return res;
-        }
+        objs.sort(Query.Compare_Order);
       }
-      on_success_fn(objs);
+  
+      await db.Insert_In_Cache(key, objs);
     }
+
+    return objs;
+  }
+
+  static Compare_Order(a, b)
+  {
+    var res;
+
+    if (a.order && !b.order)
+      res = -1;
+    else if (!a.order && b.order)
+      res = 1;
+    else if (!a.order && !b.order)
+      res = 0;
+    else if (a.order < b.order)
+      res = -1;
+    else if (a.order > b.order)
+      res = 1;
+    else
+      res = 0;
+
+    return res;
   }
 
   static Select_Obj(db, id, on_success_fn)
@@ -104,63 +111,87 @@ class Query
     }
   }
 
-  static Insert_Trend(db, query, on_success_fn)
+  static async Insert_Trend(db, query)
   {
     //console.log("Query.Insert_Trend: query =", query);
-    Indeed.Get_Job_Count(query.terms, Get_Job_Count_OK);
-    function Get_Job_Count_OK(count)
-    {
-      var trend;
+    const count = await Indeed.Get_Job_Count_Async(query.terms);
 
-      trend = new Trend();
-      trend.query_id = query.id;
-      trend.datetime = Date.now();
-      trend.count = count;
-      trend.Insert(db, Insert_OK);
-      function Insert_OK()
+    const trend = new Trend();
+    trend.query_id = query.id;
+    trend.datetime = Date.now();
+    trend.count = count;
+    await trend.Insert(db);
+
+    const vals = await Trend.Calc_Chart_Vals_By_Query(db, query);
+    const key = "Trend-Select_Chart_Vals_By_Query_" + query.id;
+    await db.Insert_In_Cache(key, vals);
+
+    return {trend, vals};
+  }
+
+  static async Insert_Trends(db)
+  {
+    var c, query;
+
+    const queries = await Query.Select_Objs(db);
+    for (c = 0; c < queries.length; c++)
+    {
+      query = queries[c];
+      if (!Util.Empty(query.terms))
       {
-        Trend.Calc_Chart_Vals_By_Query(db, query, Calc_OK);
-        function Calc_OK(vals)
-        {
-          var key = "Select_Chart_Vals_By_Query_" + query.id;
-          db.Insert_In_Cache2(key, vals, Cache_Insert_OK);
-          function Cache_Insert_OK()
-          {
-            on_success_fn(query, trend, vals);
-          }
-        }
+        const trend_info = await Query.Insert_Trend(db, query);
+        console.log("Query.Insert_Trends: Query \""+query.title+"\" updated with new value \""+
+          trend_info.trend.count+"\" for a total of "+trend_info.vals.length+" values");
+      }
+      else
+      {
+        console.log("Query.Insert_Trends: Query \""+query.title+"\" skipped due to missing query string");
       }
     }
   }
-
-  static Insert_Trends(db, on_success_fn)
+  
+  static Has_Children(db, query, on_success_fn)
   {
-    //console.log("Query.Insert_Trends");
-    Query.Select_Objs(db, Select_Objs_OK);
-    function Select_Objs_OK(queries)
-    {
-      var c, todo = queries.length, query;
+    var ref;
 
-      for (c = 0; c < queries.length; c++)
+    ref = db.conn.ref("query");
+    ref = ref.orderByChild("parent_id");
+    ref = ref.equalTo(query.id);
+    ref = ref.limitToFirst(1);
+    ref.once('value').then(If_Have_Data);
+    function If_Have_Data(query_res)
+    {
+      var child_query, res = false;
+
+      child_query = Db.To_Obj(query_res);
+      if (child_query)
       {
-        query = queries[c];
-        if (!Util.Empty(query.terms))
-        {
-          Query.Insert_Trend(db, query, Insert_From_Query_OK);
-          function Insert_From_Query_OK(query, trend, vals)
-          {
-            console.log("Query.Insert_Trends: Query \""+query.title+"\" updated with new value \""+trend.count+"\" for a total of "+vals.length+" values");
-            todo--;
-            if (todo == 0 && on_success_fn != null)
-              on_success_fn();
-          }
-        }
-        else
-        {
-          console.log("Query.Insert_Trends: Query \""+query.title+"\" skipped due to missing query string");
-        }
+        res = true;
       }
+
+      on_success_fn(query, res);
     }
+  }
+
+  static Select_Root_Objs(db, on_success_fn)
+  {
+    Query.Select_Child_Objs(db, null, on_success_fn);
+  }
+
+  static async Select_Child_Objs(db, id)
+  {
+    var ref, query_res, items;
+
+    ref = db.conn.ref("query");
+    ref = ref.orderByChild("parent_id");
+    ref = ref.equalTo(id);
+    query_res = await ref.once('value');
+
+    items = Db.To_Array(query_res);
+    if (items)
+      items.sort(Query.Compare_Order);
+
+    return items;
   }
 }
 

@@ -1,50 +1,23 @@
 ﻿const functions = require('firebase-functions');
 const firebase = require('firebase-admin');
+//const serviceAccount = require('C:\\projects\\Trend-Buddy\\functions\\trend-buddy-firebase-adminsdk-ymhg3-c65d28fe1d.json');
 
 class Db
 {
   constructor()
   {
+    /*const config =
+    {
+      credential: firebase.credential.cert(serviceAccount),
+      databaseURL: "https://trend-buddy.firebaseio.com",
+    };
+    firebase.initializeApp(config);*/
     firebase.initializeApp(functions.config().firebase);
     this.conn = firebase.database();
 
-    this.use_cache = true;
+    this.use_cache = false;
+    this.use_db_cache = true;
     this.cache = [];
-  }
-
-  Exists_In_Cache(key)
-  {
-    var res = false;
-
-    if (this.cache[key] != null)
-      res = true;
-
-    return res;
-  }
-
-  Get_From_Cache(key)
-  {
-    return this.cache[key];
-  }
-
-  Insert_In_Cache(key, val)
-  {
-    this.cache[key] = val;
-  }
-
-  If_Not_In_Cache(key, get_val_fn, on_success_fn)
-  {
-    var val = null;
-
-    if (this.Exists_In_Cache(key))
-    {
-      val = this.Get_From_Cache(key);
-      on_success_fn(val);
-    }
-    else
-    {
-      get_val_fn();
-    }
   }
 
   Exists_In_Cache2(key, on_success_fn)
@@ -131,11 +104,80 @@ class Db
     }
   }
 
-  Delete_From_Cache(key, on_success_fn)
+  // Async cache ==================================================================================
+  
+  async Get_From_Cache(key)
   {
-    this.cache[key] = null;
-    this.conn.ref("/cache/" + key).remove(on_success_fn);
+    let res = { not_in_cache: true };
+
+    if (this.use_cache && this.cache[key] != undefined)
+    {
+      res = this.cache[key];
+    }
+    else if (this.use_db_cache)
+    {
+      const res = await this.Get_From_Cache_Db(key);
+      if (this.use_cache)
+      {
+        this.cache[key] = res;
+      }
+    }
+
+    return res;
   }
+
+  async Get_From_Cache_Db(key)
+  {
+    let res = null;
+    const query_res = await this.conn.ref("/cache/" + key).once('value');
+    const val = query_res.val();
+    if (val)
+    {
+      res = JSON.parse(val);
+    }
+
+    return res;
+}
+
+  async Insert_In_Cache(key, val)
+  {
+    if (val == undefined)
+      val = null;
+
+    if (this.use_cache)
+      this.cache[key] = val;
+
+    if (this.use_db_cache)
+      await this.conn.ref("/cache/" + key).set(JSON.stringify(val));
+  }
+
+  async Delete_From_Cache(key)
+  {
+    if (this.use_db_cache)
+    {
+      this.cache[key] = undefined;
+    }
+
+    if (this.use_db_cache)
+    {
+      await this.conn.ref("/cache/" + key).remove();
+    }
+  }
+
+  async Clr_Cache()
+  {
+    if (this.use_db_cache)
+    {
+      this.cache = [];
+    }
+
+    if (this.use_db_cache)
+    {
+      await this.conn.ref("/cache").remove();
+    }
+  }
+
+  // General data access ==========================================================================
 
   Select_Obj(path, on_success_fn)
   {
@@ -148,18 +190,17 @@ class Db
     }
   }
 
-  Select_Objs(path, on_success_fn, order_by)
+  async Select_Objs(path, order_by)
   {
-    var ref;
+    var ref, query_res, vals;
 
     ref = this.conn.ref(path);
     if (order_by)
       ref = ref.orderByChild(order_by);
-    ref.once('value').then(Then_OK);
-    function Then_OK(query_res)
-    {
-      Db.To_Array(query_res, on_success_fn);
-    }
+    query_res = await ref.once('value');
+    vals = Db.To_Array(query_res);
+      
+    return vals;
   }
 
   Insert(path, obj, on_success_fn)
