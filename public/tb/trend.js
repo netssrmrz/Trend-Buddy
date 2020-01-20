@@ -27,7 +27,7 @@ class Trend
   {
     var key, val;
 
-    key = "Select_By_Query_Id_Async_" + query_id;
+    key = "Trend-Select_By_Query_Id_" + query_id;
     val = await db.Get_From_Cache(key);
     if (val.not_in_cache)
     {
@@ -47,7 +47,7 @@ class Trend
   {
     var key;
 
-    key = "Select_Chart_Vals_By_Query_" + query.id;
+    key = "Trend-Select_Chart_Vals_By_Query_" + query.id;
     db.If_Not_In_Cache2(key, Get_Vals, Parse_Vals, on_success_fn);
     function Get_Vals()
     {
