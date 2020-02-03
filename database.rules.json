@@ -2,6 +2,7 @@
   "rules": {
     ".read": true,
     ".write": "auth.uid === '7HKX98NN5TVcEDeOJzLzHvClR7g1'",
-    "trend": { ".indexOn": "query_id" }
+    "trend": { ".indexOn": "query_id" },
+    "query": { ".indexOn": "parent_id" }
   }
 }

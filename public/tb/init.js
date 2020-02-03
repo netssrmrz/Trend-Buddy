@@ -153,20 +153,31 @@ class Util
 
   static Hide(elem)
   {
-    elem.prev_style_display = elem.style.display;
-    elem.style.display = "none";
+    if (Util.Is_Visible(elem))
+    {
+      elem.prev_style_display = elem.style.display;
+      elem.style.display = "none";
+    }
   }
 
   static Show(elem)
   {
-    if (elem.prev_style_display)
+    if (!Util.Is_Visible(elem))
     {
-      elem.style.display = elem.prev_style_display;
+      if (elem.prev_style_display && elem.prev_style_display != "none")
+      {
+        elem.style.display = elem.prev_style_display;
+      }
+      else
+      {
+        elem.style.display = "block";
+      }
     }
-    else
-    {
-      elem.style.display = "block";
-    }
+  }
+
+  static Is_Visible(elem)
+  {
+    return elem && elem.style.display && elem.style.display != "none";
   }
 
   static Clr(elem)

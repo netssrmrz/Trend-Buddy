@@ -6,6 +6,7 @@ Note: This application relies on a custom built Java HTTP proxy to resolve CORS 
 To Deploy Site and Functions: firebase deploy
 To Deploy Site Only: firebase deploy --only hosting
 To Deploy Functions Only: firebase deploy --only functions
+To Deploy Db Rules Only: firebase deploy --only firestore:rules
 
 To Run Site: http-server public
 To Run function: 
