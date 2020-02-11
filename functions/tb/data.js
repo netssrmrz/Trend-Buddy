@@ -16,8 +16,10 @@ class Db
     this.conn = firebase.database();
 
     this.use_cache = false;
-    this.use_db_cache = true;
+     this.read_db_cache = false;
+    this.write_db_cache = true;
     this.cache = [];
+    this.trace_hits = false;
   }
 
   Exists_In_Cache2(key, on_success_fn)
@@ -53,6 +55,7 @@ class Db
     val = this.cache[key];
     if (val == null)
     {
+      Then_OK = Then_OK.bind(this);
       this.conn.ref("/cache/" + key).once('value').then(Then_OK);
       function Then_OK(query_res)
       {
@@ -62,28 +65,36 @@ class Db
           val = parse_fn(val);
         cache[key] = val;
         on_success_fn(val);
+        this.Log("Db.Get_From_Cache2(): Db cache hit for key \"" + key + "\"");
       }
     }
     else
+    {
       on_success_fn(val);
+      this.Log("Db.Get_From_Cache2(): Mem. cache hit for key \"" + key + "\"");
+    }
   }
 
   Insert_In_Cache2(key, val, on_success_fn)
   {
-    //console.log("Db.Insert_In_Cache2: key =", key);
     if (this.use_cache)
     {
       if (val == undefined)
         val = null;
     this.cache[key] = val;
+      Insert_OK = Insert_OK.bind(this);
     this.conn.ref("/cache/" + key).set(JSON.stringify(val), Insert_OK);
     function Insert_OK()
     {
       on_success_fn(val);
+        this.Log("Db.Insert_In_Cache2(): Db cache update for key \"" + key + "\"");
     }
   }
     else
+    {
       on_success_fn(val);
+      this.Log("Db.Insert_In_Cache2(): Mem. cache update for key \"" + key + "\"");
+    }
   }
 
   If_Not_In_Cache2(key, get_val_fn, parse_fn, on_success_fn)
@@ -104,76 +115,83 @@ class Db
     }
   }
 
+  Log(msg)
+  {
+    if (this.trace_hits)
+    {
+      console.log(msg);
+    }
+  }
+
   // Async cache ==================================================================================
   
   async Get_From_Cache(key)
   {
     let res = { not_in_cache: true };
 
-    if (this.use_cache && this.cache[key] != undefined)
+    if (this.use_cache)
+    {
+      if (this.cache[key] != undefined)
     {
       res = this.cache[key];
+        this.Log("Db.Get_From_Cache(): Mem. cache hit for key \"" + key + "\"");
     }
-    else if (this.use_db_cache)
+    else if (this.read_db_cache)
     {
-      const res = await this.Get_From_Cache_Db(key);
-      if (this.use_cache)
+        const query_res = await this.conn.ref("/cache/" + key).once('value');
+        const val = query_res.val();
+        if (val)
       {
+          res = JSON.parse(val);
         this.cache[key] = res;
+        this.Log("Db.Get_From_Cache(): Db cache hit for key \"" + key + "\"");
       }
+    }
     }
 
     return res;
   }
 
-  async Get_From_Cache_Db(key)
-  {
-    let res = null;
-    const query_res = await this.conn.ref("/cache/" + key).once('value');
-    const val = query_res.val();
-    if (val)
-    {
-      res = JSON.parse(val);
-    }
-
-    return res;
-}
-
   async Insert_In_Cache(key, val)
   {
-    if (val == undefined)
-      val = null;
-
     if (this.use_cache)
+    {
+      if (val == undefined)
+        val = null;
       this.cache[key] = val;
+      this.Log("Db.Insert_In_Cache(): Mem. cache update for key \"" + key + "\"");
 
-    if (this.use_db_cache)
-      await this.conn.ref("/cache/" + key).set(JSON.stringify(val));
+      if (this.write_db_cache)
+      {
+        await this.conn.ref("/cache/" + key).set(JSON.stringify(val));
+        this.Log("Db.Insert_In_Cache(): Db cache update for key \"" + key + "\"");
+      }
+    }
   }
 
   async Delete_From_Cache(key)
   {
-    if (this.use_db_cache)
+    if (this.use_cache)
     {
       this.cache[key] = undefined;
-    }
 
-    if (this.use_db_cache)
-    {
-      await this.conn.ref("/cache/" + key).remove();
+      if (this.write_db_cache)
+      {
+        await this.conn.ref("/cache/" + key).remove();
+      }
     }
   }
 
   async Clr_Cache()
   {
-    if (this.use_db_cache)
+    if (this.use_cache)
     {
       this.cache = [];
-    }
-
-    if (this.use_db_cache)
-    {
-      await this.conn.ref("/cache").remove();
+  
+      if (this.write_db_cache)
+      {
+        await this.conn.ref("/cache").remove();
+      }
     }
   }
 
