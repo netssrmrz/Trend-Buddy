@@ -196,12 +196,16 @@ class Util
 
   static Is_Visible(elem)
   {
-    let res = false;
+    let res = true;
 
-    if (elem != null && elem.style.display != null && elem.style.display != "none")
+    if (elem)
     {
-      res = true;
-    }
+      const style_display = window.getComputedStyle(elem).display;
+      if (style_display == undefined || style_display == null || style_display == "" || style_display == "none")
+      {
+        res = false;
+      }
+    } 
 
     return res;
   }
