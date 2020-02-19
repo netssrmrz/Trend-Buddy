@@ -99,7 +99,7 @@ export class QueryRankings extends PolymerElement
     {
       const query = this.child_queries[i];
       const count = await Trend.Select_Last_Val(this.db, query.id);
-      const value = [query.title, count, "color: #0c0"];
+      const value = [this.Trim(query.title), count, "color: #0c0"];
       values.push(value);
     }
 
@@ -119,6 +119,19 @@ export class QueryRankings extends PolymerElement
     }
 
     return values;
+  }
+
+  Trim(str)
+  {
+    let res = str;
+    const max_length = 9;
+
+    if (str && str.length>max_length)
+    {
+      res = str.substring(0, max_length);
+    }
+
+    return res;
   }
 }
 customElements.define('query-rankings', QueryRankings);
