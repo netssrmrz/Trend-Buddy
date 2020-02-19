@@ -15,8 +15,8 @@ class Db
     firebase.initializeApp(functions.config().firebase);
     this.conn = firebase.database();
 
-    this.use_cache = false;
-     this.read_db_cache = false;
+    this.use_cache = true;
+    this.read_db_cache = false;
     this.write_db_cache = true;
     this.cache = [];
     this.trace_hits = false;
@@ -132,21 +132,21 @@ class Db
     if (this.use_cache)
     {
       if (this.cache[key] != undefined)
-    {
-      res = this.cache[key];
+      {
+        res = this.cache[key];
         this.Log("Db.Get_From_Cache(): Mem. cache hit for key \"" + key + "\"");
-    }
-    else if (this.read_db_cache)
-    {
+      }
+      else if (this.read_db_cache)
+      {
         const query_res = await this.conn.ref("/cache/" + key).once('value');
         const val = query_res.val();
         if (val)
-      {
+        {
           res = JSON.parse(val);
-        this.cache[key] = res;
-        this.Log("Db.Get_From_Cache(): Db cache hit for key \"" + key + "\"");
+          this.cache[key] = res;
+          this.Log("Db.Get_From_Cache(): Db cache hit for key \"" + key + "\"");
+        }
       }
-    }
     }
 
     return res;
