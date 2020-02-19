@@ -223,6 +223,19 @@ class Db
     }
   }
 
+  async Select_Objs_Async(path, order_by)
+  {
+    var ref, query_res, vals;
+
+    ref = this.conn.ref(path);
+    if (order_by)
+      ref = ref.orderByChild(order_by);
+    query_res = await ref.once('value');
+    vals = Db.To_Array(query_res);
+      
+    return vals;
+  }
+
   Insert(path, obj, on_success_fn)
   {
     //console.log("Insert");

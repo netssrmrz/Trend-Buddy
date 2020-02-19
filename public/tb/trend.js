@@ -95,10 +95,35 @@ class Trend
     }
   }
 
+  static async Calc_Chart_Vals_By_Query_Async(db, query)
+  {
+    const items = await Trend.Select_By_Query_Id_Async(db, query.id);
+    var c, item_vals, item, vals;
+
+    if (!Util.Empty(items))
+    {
+      vals = [];
+      vals.push(['Date', query.title]);
+      for (c = 0; c < items.length; c++)
+      {
+        item = items[c];
+        item_vals = [new Date(item.datetime), item.count];
+        vals.push(item_vals);
+      }
+    }
+
+    return vals;
+  }
+
   Insert(db, on_success_fn)
   {
     //console.log("Trend.Insert: this =", this);
     db.Insert("/trend", this, on_success_fn);
+  }
+
+  Insert_Async(db)
+  {
+    return db.Insert("/trend", this);
   }
 
   Update(db, on_success_fn)

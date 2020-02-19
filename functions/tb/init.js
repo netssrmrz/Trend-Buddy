@@ -173,13 +173,18 @@ class Util
 
   static Hide(elem)
   {
+    if (Util.Is_Visible(elem))
+    {
     elem.prev_style_display = elem.style.display;
     elem.style.display = "none";
+  }
   }
 
   static Show(elem)
   {
-    if (elem.prev_style_display)
+    if (!Util.Is_Visible(elem))
+    {
+      if (elem.prev_style_display != null && elem.prev_style_display != "none")
     {
       elem.style.display = elem.prev_style_display;
     }
@@ -187,6 +192,19 @@ class Util
     {
       elem.style.display = "block";
     }
+  }
+  }
+
+  static Is_Visible(elem)
+  {
+    let res = false;
+
+    if (elem != null && elem.style.display != null && elem.style.display != "none")
+    {
+      res = true;
+    }
+
+    return res;
   }
 
   static Clr(elem)

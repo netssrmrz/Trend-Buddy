@@ -22,6 +22,25 @@ class Util
     }
   }
 
+  static async Req_Json_Async(url)
+  {
+    let res = null;
+    const options = {
+      method: 'get',
+    };
+
+    const request = fetch(url, options);
+    const response = await request;
+    if (response.ok)
+    {
+      const response_text = await response.text();
+      res = JSON.parse(response_text);
+    }
+
+    return res;
+
+  }
+
   static Clr_Child_Elems(elem, start)
   {
     Util.Clr_Children(elem, start, Polymer.dom(elem).children);
@@ -164,7 +183,7 @@ class Util
   {
     if (!Util.Is_Visible(elem))
     {
-      if (elem.prev_style_display && elem.prev_style_display != "none")
+      if (elem.prev_style_display != null && elem.prev_style_display != "none")
       {
         elem.style.display = elem.prev_style_display;
       }
@@ -177,7 +196,14 @@ class Util
 
   static Is_Visible(elem)
   {
-    return elem && elem.style.display && elem.style.display != "none";
+    let res = false;
+
+    if (elem != null && elem.style.display != null && elem.style.display != "none")
+    {
+      res = true;
+    }
+
+    return res;
   }
 
   static Clr(elem)

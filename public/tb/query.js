@@ -10,20 +10,24 @@ class Query
     this.parent_id = null;
   }
 
-  static Select_Objs(db, on_success_fn)
+  static async Select_Objs(db)
   {
-    var key;
+    var key, objs;
 
     key = "Query-Select_Objs";
-    db.If_Not_In_Cache2(key, Get_Vals, null, on_success_fn);
-    function Get_Vals()
+    objs = await db.Get_From_Cache(key);
+    if (objs.not_in_cache)
     {
-      Query.Select_Objs_No_Cache(db, Select_OK);
-      function Select_OK(objs)
+      objs = await db.Select_Objs_Async("/query");
+      if (objs)
       {
-        db.Insert_In_Cache2(key, objs, on_success_fn);
+        objs.sort(Query.Compare_Order);
       }
+  
+      await db.Insert_In_Cache(key, objs);
     }
+
+    return objs;
   }
 
   static Select_Objs_No_Cache(db, on_success_fn)
@@ -146,6 +150,24 @@ class Query
     }
   }
 
+  static async Insert_Trend_Async(db, query)
+  {
+    //console.log("Query.Insert_Trend: query =", query);
+    const count = await Indeed.Get_Job_Count_Async(query.terms);
+
+    const trend = new Trend();
+    trend.query_id = query.id;
+    trend.datetime = Date.now();
+    trend.count = count;
+    await trend.Insert_Async(db);
+
+    const vals = await Trend.Calc_Chart_Vals_By_Query_Async(db, query);
+    const key = "Trend-Select_Chart_Vals_By_Query_" + query.id;
+    await db.Insert_In_Cache(key, vals);
+
+    return {trend, vals};
+  }
+
   static Insert_Trends(db, on_success_fn)
   {
     //console.log("Query.Insert_Trends");
@@ -176,6 +198,27 @@ class Query
     }
   }
   
+  static async Insert_Trends_Async(db)
+  {
+    var c, query;
+
+    const queries = await Query.Select_Objs(db);
+    for (c = 0; c < queries.length; c++)
+    {
+      query = queries[c];
+      if (!Util.Empty(query.terms))
+      {
+        const trend_info = await Query.Insert_Trend_Async(db, query);
+        console.log("Query.Insert_Trends: Query \""+query.title+"\" updated with new value \""+
+          trend_info.trend.count+"\" for a total of "+trend_info.vals.length+" values");
+      }
+      else
+      {
+        console.log("Query.Insert_Trends: Query \""+query.title+"\" skipped due to missing query string");
+      }
+    }
+  }
+  
   static Has_Children(db, query, on_success_fn)
   {
     var ref;
@@ -199,24 +242,26 @@ class Query
     }
   }
 
-  static Select_Root_Objs(db, on_success_fn)
-  {
-    Query.Select_Child_Objs(db, null, on_success_fn);
-  }
-
   static async Select_Child_Objs(db, id)
   {
-    var ref, query_res, items;
+    var key, val;
+    var ref, query_res;
 
-    ref = db.conn.ref("query");
-    ref = ref.orderByChild("parent_id");
-    ref = ref.equalTo(id);
-    query_res = await ref.once('value');
+    key = "Query-Select_Child_Objs_" + id;
+    val = await db.Get_From_Cache(key);
+    if (val.not_in_cache)
+    {
+      ref = db.conn.ref("query");
+      ref = ref.orderByChild("parent_id");
+      ref = ref.equalTo(id);
+      query_res = await ref.once('value');
+      val = Db.To_Array(query_res);
+      if (val)
+        val.sort(Query.Compare_Order);
+  
+      await db.Insert_In_Cache(key, val);
+    }
 
-    items = Db.To_Array(query_res);
-    if (items)
-      items.sort(Query.Compare_Order);
-
-    return items;
+    return val;
   }
 }

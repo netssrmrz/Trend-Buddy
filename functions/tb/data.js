@@ -208,7 +208,21 @@ class Db
     }
   }
 
-  async Select_Objs(path, order_by)
+  Select_Objs(path, on_success_fn, order_by)
+  {
+    var ref;
+
+    ref = this.conn.ref(path);
+    if (order_by)
+      ref = ref.orderByChild(order_by);
+    ref.once('value').then(Then_OK);
+    function Then_OK(query_res)
+    {
+      Db.To_Array(query_res, on_success_fn);
+    }
+  }
+
+  async Select_Objs_Async(path, order_by)
   {
     var ref, query_res, vals;
 

@@ -16,7 +16,16 @@ class Trend
     db.Select_Obj("/trend/" + id, on_success_fn);
   }
 
-  static async Select_By_Query_Id(db, query_id)
+  static Select_By_Query_Id(db, query_id, on_success_fn)
+  {
+    db.conn.ref("/trend").orderByChild("query_id").equalTo(query_id).once("value", OK_Fn);
+    function OK_Fn(query_res)
+    {
+      Db.To_Array(query_res, on_success_fn);
+    }
+  }
+
+  static async Select_By_Query_Id_Async(db, query_id)
   {
     var key, val;
 
@@ -65,9 +74,32 @@ class Trend
     }
   }
 
-  static async Calc_Chart_Vals_By_Query(db, query)
+  static Calc_Chart_Vals_By_Query(db, query, on_success_fn)
   {
-    const items = await Trend.Select_By_Query_Id(db, query.id);
+    Trend.Select_By_Query_Id(db, query.id, Select_OK);
+    function Select_OK(items)
+    {
+      var c, item_vals, item, vals;
+
+      if (!Util.Empty(items))
+      {
+        vals = [];
+        vals.push(['Date', query.title]);
+        for (c = 0; c < items.length; c++)
+        {
+          item = items[c];
+          item_vals = [new Date(item.datetime), item.count];
+          vals.push(item_vals);
+        }
+      }
+
+      on_success_fn(vals);
+    }
+  }
+
+  static async Calc_Chart_Vals_By_Query_Async(db, query)
+  {
+    const items = await Trend.Select_By_Query_Id_Async(db, query.id);
     var c, item_vals, item, vals;
 
     if (!Util.Empty(items))
@@ -85,7 +117,13 @@ class Trend
     return vals;
   }
 
-  Insert(db)
+  Insert(db, on_success_fn)
+  {
+    //console.log("Trend.Insert: this =", this);
+    db.Insert("/trend", this, on_success_fn);
+  }
+
+  Insert_Async(db)
   {
     return db.Insert("/trend", this);
   }

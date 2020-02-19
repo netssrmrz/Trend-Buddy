@@ -21,7 +21,7 @@ class Query
     objs = await db.Get_From_Cache(key);
     if (objs.not_in_cache)
     {
-      objs = await db.Select_Objs("/query");
+      objs = await db.Select_Objs_Async("/query");
       if (objs)
       {
         objs.sort(Query.Compare_Order);
@@ -31,6 +31,19 @@ class Query
     }
 
     return objs;
+  }
+
+  static Select_Objs_No_Cache(db, on_success_fn)
+  {
+    db.Select_Objs("/query", Select_OK);
+    function Select_OK(objs)
+    {
+      if (objs)
+      {
+        objs.sort(Compare_Order);
+      }
+      on_success_fn(objs);
+    }
   }
 
   static Compare_Order(a, b)
@@ -111,7 +124,36 @@ class Query
     }
   }
 
-  static async Insert_Trend(db, query)
+  static Insert_Trend(db, query, on_success_fn)
+  {
+    //console.log("Query.Insert_Trend: query =", query);
+    Indeed.Get_Job_Count(query.terms, Get_Job_Count_OK);
+    function Get_Job_Count_OK(count)
+    {
+      var trend;
+
+      trend = new Trend();
+      trend.query_id = query.id;
+      trend.datetime = Date.now();
+      trend.count = count;
+      trend.Insert(db, Insert_OK);
+      function Insert_OK()
+      {
+        Trend.Calc_Chart_Vals_By_Query(db, query, Calc_OK);
+        function Calc_OK(vals)
+        {
+          var key = "Select_Chart_Vals_By_Query_" + query.id;
+          db.Insert_In_Cache2(key, vals, Cache_Insert_OK);
+          function Cache_Insert_OK()
+          {
+            on_success_fn(query, trend, vals);
+          }
+        }
+      }
+    }
+  }
+
+  static async Insert_Trend_Async(db, query)
   {
     //console.log("Query.Insert_Trend: query =", query);
     const count = await Indeed.Get_Job_Count_Async(query.terms);
@@ -120,16 +162,46 @@ class Query
     trend.query_id = query.id;
     trend.datetime = Date.now();
     trend.count = count;
-    await trend.Insert(db);
+    await trend.Insert_Async(db);
 
-    const vals = await Trend.Calc_Chart_Vals_By_Query(db, query);
+    const vals = await Trend.Calc_Chart_Vals_By_Query_Async(db, query);
     const key = "Trend-Select_Chart_Vals_By_Query_" + query.id;
     await db.Insert_In_Cache(key, vals);
 
     return {trend, vals};
   }
 
-  static async Insert_Trends(db)
+  static Insert_Trends(db, on_success_fn)
+  {
+    //console.log("Query.Insert_Trends");
+    Query.Select_Objs_No_Cache(db, Select_Objs_OK);
+    function Select_Objs_OK(queries)
+    {
+      var c, todo = queries.length, query;
+
+      for (c = 0; c < queries.length; c++)
+      {
+        query = queries[c];
+        if (!Util.Empty(query.terms))
+        {
+          Query.Insert_Trend(db, query, Insert_From_Query_OK);
+          function Insert_From_Query_OK(query, trend, vals)
+          {
+            console.log("Query.Insert_Trends: Query \""+query.title+"\" updated with new value \""+trend.count+"\" for a total of "+vals.length+" values");
+            todo--;
+            if (todo == 0 && on_success_fn != null)
+              on_success_fn();
+          }
+        }
+        else
+        {
+          console.log("Query.Insert_Trends: Query \""+query.title+"\" skipped due to missing query string");
+        }
+      }
+    }
+  }
+
+  static async Insert_Trends_Async(db)
   {
     var c, query;
 
@@ -139,7 +211,7 @@ class Query
       query = queries[c];
       if (!Util.Empty(query.terms))
       {
-        const trend_info = await Query.Insert_Trend(db, query);
+        const trend_info = await Query.Insert_Trend_Async(db, query);
         console.log("Query.Insert_Trends: Query \""+query.title+"\" updated with new value \""+
           trend_info.trend.count+"\" for a total of "+trend_info.vals.length+" values");
       }
@@ -173,25 +245,27 @@ class Query
     }
   }
 
-  static Select_Root_Objs(db, on_success_fn)
-  {
-    Query.Select_Child_Objs(db, null, on_success_fn);
-  }
-
   static async Select_Child_Objs(db, id)
   {
-    var ref, query_res, items;
+    var key, val;
+    var ref, query_res;
 
+    key = "Query-Select_Child_Objs_" + id;
+    val = await db.Get_From_Cache(key);
+    if (val.not_in_cache)
+    {
     ref = db.conn.ref("query");
     ref = ref.orderByChild("parent_id");
     ref = ref.equalTo(id);
     query_res = await ref.once('value');
+      val = Db.To_Array(query_res);
+      if (val)
+        val.sort(Query.Compare_Order);
 
-    items = Db.To_Array(query_res);
-    if (items)
-      items.sort(Query.Compare_Order);
+      await db.Insert_In_Cache(key, val);
+    }
 
-    return items;
+    return val;
   }
 }
 

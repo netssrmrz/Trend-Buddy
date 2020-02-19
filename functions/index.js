@@ -13,7 +13,7 @@ exports.updateAllTrendsScheduled =
 async function Update_All_Trends(req, res)
 {
   await db.Clr_Cache();
-  await Query.Insert_Trends(db);
+  await Query.Insert_Trends_Async(db);
   res.status(200);
   res.end();
 }
