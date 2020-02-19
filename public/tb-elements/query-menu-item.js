@@ -88,8 +88,9 @@ export class QueryMenuItem extends PolymerElement
     this.child_queries = await Query.Select_Child_Objs(this.db, query_id);
     if (this.child_queries && this.child_queries.length > 0)
     {
+      const is_home_menu = query_id == null;
       this.is_menu = true;
-      this.Render_Items();
+      this.Render_Items(is_home_menu);
     }
     else
     {
@@ -116,11 +117,21 @@ export class QueryMenuItem extends PolymerElement
     this.$.item.append(checkbox_elem);
   }
 
-  Render_Items()
+  Render_Items(is_home_menu)
   {
-    const stats_elem = document.createElement("paper-icon-button");
-    stats_elem.icon = "trending-up";
-    stats_elem.onclick = this.On_Choose_Trend.bind(this);
+    if (is_home_menu)
+    {
+      const stats_elem = document.createElement("paper-icon-button");
+      stats_elem.icon = "menu";
+      this.$.item.append(stats_elem);
+    }
+    else
+    {
+      const stats_elem = document.createElement("paper-icon-button");
+      stats_elem.icon = "trending-up";
+      stats_elem.onclick = this.On_Choose_Trend.bind(this);
+      this.$.item.append(stats_elem);
+    }
 
     const list_elem = document.createElement("iron-collapse");
     list_elem.id = "list";
@@ -128,7 +139,6 @@ export class QueryMenuItem extends PolymerElement
     this.$.list_elem = list_elem;
 
     this.$.item.onclick = this.On_Toggle_Menu.bind(this);
-    this.$.item.append(stats_elem);
 
     var c;
 
