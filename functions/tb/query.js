@@ -1,6 +1,7 @@
 ﻿const Trend = require('./trend');
 const Util = require('./init');
 const Indeed = require('./indeed');
+const Db = require('./data');
 
 class Query
 {
