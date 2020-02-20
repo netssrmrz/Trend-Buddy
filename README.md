@@ -9,7 +9,7 @@ To Deploy Functions Only: firebase deploy --only functions
 To Deploy Db Rules Only: firebase deploy --only firestore:rules  
 
 To Run Site: http-server public  
-To Run function:  
+To Run Functions:  
 set GOOGLE_APPLICATION_CREDENTIALS=C:\projects\Trend-Buddy\functions\trend-buddy-firebase-adminsdk-ymhg3-c65d28fe1d.json  
 firebase emulators:start --only functions  
 http://localhost:5001/trend-buddy/us-central1/updateAllTrends  
