@@ -75,25 +75,32 @@ export class QueryStats extends PolymerElement
       <div id="d_elem">
         <span class="val_label">1d:</span> 
         <div class="val">
-          <span id="val_d_elem"><paper-spinner-lite active></paper-spinner-lite></span> 
-          <span id="val_d_pct_elem"><paper-spinner-lite active></paper-spinner-lite></span>
+          <span id="val_d_elem"></span> 
+          <span id="val_d_pct_elem"></span>
           <iron-icon id="val_d_icon_elem" icon="" class="trend-icon"></iron-icon>
           </div>
         </div>
       <div id="month_d_elem">
         <span class="val_label">1m:</span> 
         <div class="val">
-          <span id="val_month_d_elem"><paper-spinner-lite active></paper-spinner-lite></span> 
-          <span id="val_month_d_pct_elem"><paper-spinner-lite active></paper-spinner-lite></span>
+          <span id="val_month_d_elem"></span> 
+          <span id="val_month_d_pct_elem"></span>
           <iron-icon id="val_month_d_icon_elem" icon="" class="trend-icon"></iron-icon>
           </div>
         </div>
-      <div id="overall_d_elem">
+        <div id="overall_d_elem">
         <span class="val_label">Overall:</span> 
         <div class="val">
-          <span id="val_overall_d_elem"><paper-spinner-lite active></paper-spinner-lite></span> 
-          <span id="val_overall_d_pct_elem"><paper-spinner-lite active></paper-spinner-lite></span>
+          <span id="val_overall_d_elem"></span> 
+          <span id="val_overall_d_pct_elem"></span>
           <iron-icon id="val_overall_d_icon_elem" icon="" class="trend-icon"></iron-icon>
+          </div>
+        </div>
+        <div id="since_d_elem">
+        <span class="val_label">Since:</span> 
+        <div class="val">
+          <span id="val_since_elem"></span> 
+          <span id="val_since_days_elem"></span>
           </div>
         </div>
     `;
@@ -107,13 +114,26 @@ export class QueryStats extends PolymerElement
     const val = await Trend.Select_Last_Val(this.db, this.query.id);
     const prev_val = await Trend.Select_Prev_Val(this.db, this.query.id);
     const prev_month_val = await Trend.Select_Prev_Month_Val(this.db, this.query.id);
-    const first_val = await Trend.Select_First_Val(this.db, this.query.id);
+    const first_entry = await Trend.Select_First(this.db, this.query.id);
+    const first_val = first_entry.count;
 
     this.$.val_elem.textContent = val;
     
     this.Append_Trend(val, prev_val, this.$.val_d_elem, this.$.val_d_pct_elem, this.$.d_elem, this.$.val_d_icon_elem);
     this.Append_Trend(val, prev_month_val, this.$.val_month_d_elem, this.$.val_month_d_pct_elem, this.$.month_d_elem, this.$.val_month_d_icon_elem);
     this.Append_Trend(val, first_val, this.$.val_overall_d_elem, this.$.val_overall_d_pct_elem, this.$.overall_d_elem, this.$.val_overall_d_icon_elem);
+    this.Append_Since(first_entry.datetime);
+  }
+
+  Append_Since(millis)
+  {
+    console.log(millis);
+    const date = new Date();
+    date.setTime(millis);
+    this.$.val_since_elem.textContent = date.toLocaleDateString();
+
+    const days = (Date.now() - millis) / 1000 / 60 / 60 / 24;
+    this.$.val_since_days_elem.textContent = "(" + Math.round(days) + "d)";
   }
 
   Append_Trend(val, prev_val, val_d_elem, val_d_pct_elem, d_elem, icon_elem)

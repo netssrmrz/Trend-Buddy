@@ -150,6 +150,20 @@ class Trend
     return val;
   }
 
+  static async Select_First(db, query_id)
+  {
+    var vals, res;
+
+    vals = await Trend.Select_By_Query_Id_Async(db, query_id);
+    if (!Util.Empty(vals))
+    {
+      vals = Util.Sort(vals, "datetime");
+      res = vals[0];
+    }
+
+    return res;
+  }
+
   static async Select_Last_Val(db, query_id)
   {
     var vals, val = 0;
