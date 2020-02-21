@@ -117,7 +117,6 @@ class Trend
 
   Insert(db, on_success_fn)
   {
-    //console.log("Trend.Insert: this =", this);
     db.Insert("/trend", this, on_success_fn);
   }
 

@@ -200,7 +200,6 @@ class Db
 
   Select_Obj(path, on_success_fn)
   {
-    //console.log("Db.Select_Obj: path =", path);
     this.conn.ref(path).once('value').then(Then_OK);
     function Then_OK(query_res)
     {
@@ -238,14 +237,12 @@ class Db
 
   Insert(path, obj, on_success_fn)
   {
-    //console.log("Insert");
     obj.id = this.conn.ref(path).push().key;
     this.conn.ref(path + "/" + obj.id).set(obj, on_success_fn);
   }
 
   Update(path, obj, on_success_fn)
   {
-    //console.log("Update");
     var ref, promise;
 
     try

@@ -127,7 +127,6 @@ export class QueryStats extends PolymerElement
 
   Append_Since(millis)
   {
-    console.log(millis);
     const date = new Date();
     date.setTime(millis);
     this.$.val_since_elem.textContent = date.toLocaleDateString();

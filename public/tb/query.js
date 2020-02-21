@@ -65,7 +65,6 @@ class Query
 
   static Select_Obj(db, id, on_success_fn)
   {
-    //console.log("Query.Select_Obj: id =", id);
     db.Select_Obj("/query/" + id, on_success_fn);
   }
 
@@ -123,7 +122,6 @@ class Query
 
   static Insert_Trend(db, query, on_success_fn)
   {
-    //console.log("Query.Insert_Trend: query =", query);
     Indeed.Get_Job_Count(query.terms, Get_Job_Count_OK);
     function Get_Job_Count_OK(count)
     {
@@ -152,7 +150,6 @@ class Query
 
   static async Insert_Trend_Async(db, query)
   {
-    //console.log("Query.Insert_Trend: query =", query);
     const count = await Indeed.Get_Job_Count_Async(query.terms);
 
     const trend = new Trend();
@@ -170,7 +167,6 @@ class Query
 
   static Insert_Trends(db, on_success_fn)
   {
-    //console.log("Query.Insert_Trends");
     Query.Select_Objs_No_Cache(db, Select_Objs_OK);
     function Select_Objs_OK(queries)
     {

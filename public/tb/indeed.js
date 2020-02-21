@@ -5,7 +5,6 @@ class Indeed
   {
     var url;
 
-    //console.log("Indeed.Get_Job_Count: query =", query);
     url = "http://trend-buddy.appspot.com/ads/apisearch?" +
       "publisher=6433637473123845&" +
       "q=" + encodeURIComponent(query) + "&" +
@@ -28,7 +27,6 @@ class Indeed
 
   static async Get_Job_Count_Async(query)
   {
-    //console.log("Indeed.Get_Job_Count_Async: query =", query);
     let count = 0;
     const url =
       "http://trend-buddy.appspot.com/ads/apisearch?" +
