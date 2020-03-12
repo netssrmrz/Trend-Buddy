@@ -113,20 +113,22 @@
     var db;
 
     window.onload = Main;
-    function Main()
+    async function Main()
     {
       db = new Db();
+      db.read_db_cache = false;
+      db.write_db_cache = true;
       firebase.auth().onAuthStateChanged(Auth_State_Changed);
 
-      document.getElementById("add_option").onclick = On_Add_Query;
-      document.getElementById("upd_option").onclick = On_Update_All;
-      document.getElementById("idx_option").onclick = On_Reindex;
+      document.getElementById("new_option").onclick = On_New_Query;
+      //document.getElementById("upd_option").onclick = On_Update_All;
+      document.getElementById("idx_option").onclick = On_Refresh_Cache;
 
       document.getElementById("qry_edt").on_save_fn = On_Save_Query;
       document.getElementById("qry_edt").on_clr_data_fn = On_Clear_Data;
       document.getElementById("qry_edt").on_del_fn = On_Del_Query;
 
-      List_Query_Items();
+      await List_Query_Items();
     }
 
     function Auth_State_Changed(user)
@@ -135,28 +137,44 @@
         console.log("user.id: " + user.uid);
     }
 
-    function On_Reindex()
+    async function On_Refresh_Cache()
     {
-      Query.Select_Objs(db, Select_OK);
-      function Select_OK(queries)
-      {
-        var c, key;
+      db.read_mem_cache = false;
+      db.write_mem_cache = false;
+      db.read_db_cache = false;
+      db.write_db_cache = true;
+      
+      await Refresh_Query_Cache();
+      //await Refresh_Trend_Cache();
 
-        for (c = 0; c < queries.length; c++)
+      document.getElementById("cache_ok").show();
+    }
+
+    async function Refresh_Query_Cache()
+    {
+      // Query-Select_Child_Objs_null
+      await Query.Select_Child_Objs(db, null);
+      // Query-Select_Objs
+      await Query.Select_Objs(db);
+    }
+
+    async function Refresh_Trend_Cache()
+    {
+      // Trend-Select_By_Query_Id_-KpPWAFGBhe6CxLYn22r
+      // Trend-Select_Chart_Vals_By_Query_-KpPWAFGBhe6CxLYn22r
+      const queries = await Query.Select_Objs(db);
+      var c, key;
+
+      for (c = 0; c < queries.length; c++)
+      {
+        var query = queries[c];
+        key = "Select_Chart_Vals_By_Query_Id_" + queries[c].id;
+        await db.Delete_From_Cache(key);
+        Trend.Select_Chart_Vals_By_Query(db, query, Select_OK);
+        function Select_OK(values)
         {
-          Del_OK.query = queries[c];
-          key = "Select_Chart_Vals_By_Query_Id_" + queries[c].id;
-          db.Delete_From_Cache(key, Del_OK);
-          function Del_OK()
-          {
-            var query = Del_OK.query;
-            Trend.Select_Chart_Vals_By_Query(db, query, Select_OK);
-            function Select_OK(values)
-            {
-              document.getElementById("msg").text = "Query \"" + query.title + "\" completed.";
-              document.getElementById("msg").show();
-            }
-          }
+          document.getElementById("msg").text = "Query \"" + query.title + "\" completed.";
+          document.getElementById("msg").show();
         }
       }
     }
@@ -179,27 +197,23 @@
       }
     }
 
-    function List_Query_Items()
+    async function List_Query_Items()
     {
-      Query.Select_Objs(db, Select_OK);
-      function Select_OK(queries)
+      let c;
+      const queries = await Query.Select_Objs(db);
+      const list_elem = document.getElementById("query_items");
+
+      for (c = 0; c < queries.length; c++)
       {
-        var c, list_elem;
+        var item_elem, query;
 
-        list_elem = document.getElementById("query_items");
-
-        for (c = 0; c < queries.length; c++)
-        {
-          var item_elem, query;
-
-          query = queries[c];
-          Insert_Query_Item(list_elem, query);
-        }
+        query = queries[c];
+        Insert_Query_Item(list_elem, query);
       }
     }
 
     // show empty query editor for new query
-    function On_Add_Query()
+    function On_New_Query()
     {
       document.getElementById("qry_edt").item_elem = null;
       document.getElementById("qry_edt").Add();
@@ -284,9 +298,9 @@
 
     <app-drawer slot="drawer">
       <div id="menu_items">
-        <a id="add_option">Add Query</a>
+        <a id="new_option">New Query</a>
         <a id="upd_option">Update All</a>
-        <a id="idx_option">Index</a>
+        <a id="idx_option">Refresh Cache</a>
         <div id="query_items" class="menu_items"></div>
       </div>
     </app-drawer>
@@ -304,6 +318,7 @@
     </app-header-layout>
   </app-drawer-layout>
 
+  <paper-toast id="cache_ok" text="Cache Refreshed."></paper-toast>
   <paper-toast id="msg_ok" text="All trends updated."></paper-toast>
   <paper-toast id="qry_ok" text="Query updated."></paper-toast>
   <paper-toast id="qry_denied" text="You do not have the appropriate permission."></paper-toast>

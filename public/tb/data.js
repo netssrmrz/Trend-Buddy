@@ -17,6 +17,8 @@ class Db
     this.conn = firebase.database();
 
     this.use_cache = true;
+    this.read_mem_cache = true;
+    this.write_mem_cache = true;
     this.read_db_cache = true;
     this.write_db_cache = false;
     this.cache = [];
@@ -132,10 +134,14 @@ class Db
 
     if (this.use_cache)
     {
-      if (this.cache[key] != undefined)
+      if (this.read_mem_cache)
       {
-        res = this.cache[key];
-        this.Log("Db.Get_From_Cache(): Mem. cache hit for key \"" + key + "\"");
+        const val = this.cache[key];
+        if (val != undefined)
+        {
+          res = val;
+          this.Log("Db.Get_From_Cache(): Mem. cache hit for key \"" + key + "\"");
+        }  
       }
       else if (this.read_db_cache)
       {
@@ -157,10 +163,13 @@ class Db
   {
     if (this.use_cache)
     {
-      if (val == undefined)
-        val = null;
-      this.cache[key] = val;
-      this.Log("Db.Insert_In_Cache(): Mem. cache update for key \"" + key + "\"");
+      if (this.write_mem_cache)
+      {
+        if (val == undefined)
+          val = null;
+        this.cache[key] = val;
+        this.Log("Db.Insert_In_Cache(): Mem. cache update for key \"" + key + "\"");
+      }
 
       if (this.write_db_cache)
       {
@@ -174,26 +183,32 @@ class Db
   {
     if (this.use_cache)
     {
-    this.cache[key] = undefined;
+      if (this.write_mem_cache)
+      {
+        this.cache[key] = undefined;
+      }
 
-    if (this.write_db_cache)
-    {
-      await this.conn.ref("/cache/" + key).remove();
+      if (this.write_db_cache)
+      {
+        await this.conn.ref("/cache/" + key).remove();
+      }
     }
-  }
   }
 
   async Clr_Cache()
   {
     if (this.use_cache)
     {
-      this.cache = [];
+      if (this.write_mem_cache)
+      {
+        this.cache = [];
+      }
 
       if (this.write_db_cache)
-    {
-      await this.conn.ref("/cache").remove();
+      {
+        await this.conn.ref("/cache").remove();
+      }
     }
-  }
   }
 
   // General data access ==========================================================================

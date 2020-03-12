@@ -59,11 +59,19 @@ class QueryEditor extends PolymerElement
     if (this.on_save_fn != null)
     {
       query = new Query();
-      query.id = Util.No_Undef(this.query_id);
-      query.title = Util.No_Undef(this.$.query_title.value);
-      query.terms = Util.No_Undef(this.$.query_terms.value);
-      query.order = Util.To_Int(this.$.query_order.value);
-      query.parent_id = Util.No_Undef(this.$.query_parent.value);
+
+      Util.New_Field(query, "id", this.query_id);
+      Util.New_Field(query, "title", this.$.query_title.value);
+      Util.New_Field(query, "terms", this.$.query_terms.value);
+      Util.New_Field(query, "order", this.$.query_order.value);
+      Util.New_Field(query, "parent_id", this.$.query_parent.value);
+
+      //query.id = Util.No_Undef(this.query_id);
+      //query.title = Util.No_Undef(this.$.query_title.value);
+      //query.terms = Util.No_Undef(this.$.query_terms.value);
+      //query.order = Util.To_Int(this.$.query_order.value);
+      //query.parent_id = Util.No_UES(this.$.query_parent.value);
+
       this.on_save_fn(query);
     }
   }

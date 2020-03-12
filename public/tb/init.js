@@ -66,10 +66,13 @@ class Util
   {
     var res = true;
 
-    if (obj != null && obj.length == null)
-      res = false;
-    else if (obj != null && obj.length != null && obj.length > 0)
+    if (obj && obj.length && obj.length > 0)
       res = false
+    else if (obj && obj.trim && obj.trim() != "")
+      res = false
+    else if (obj)
+      res = false;
+
     return res;
   }
 
@@ -152,6 +155,18 @@ class Util
     if (val == undefined)
       val = null;
     return val;
+  }
+
+  static New_Field(obj, field_name, field_val, null_on_empty)
+  {
+    if (!Util.Empty(field_val))
+    {
+      obj[field_name] = field_val;
+    }
+    else if (null_on_empty)
+    {
+      obj[field_name] = null;
+    }
   }
 
   static To_Int(val)
