@@ -16,6 +16,8 @@ class Db
     this.conn = firebase.database();
 
     this.use_cache = true;
+    this.read_mem_cache = true;
+    this.write_mem_cache = true;
     this.read_db_cache = false;
     this.write_db_cache = true;
     this.cache = [];
@@ -131,10 +133,14 @@ class Db
 
     if (this.use_cache)
     {
-      if (this.cache[key] != undefined)
+      if (this.read_mem_cache)
       {
-        res = this.cache[key];
+        const val = this.cache[key];
+        if (val != undefined)
+      {
+          res = val;
         this.Log("Db.Get_From_Cache(): Mem. cache hit for key \"" + key + "\"");
+      }
       }
       else if (this.read_db_cache)
       {
@@ -156,10 +162,13 @@ class Db
   {
     if (this.use_cache)
     {
+      if (this.write_mem_cache)
+      {
       if (val == undefined)
         val = null;
       this.cache[key] = val;
       this.Log("Db.Insert_In_Cache(): Mem. cache update for key \"" + key + "\"");
+      }
 
       if (this.write_db_cache)
       {
@@ -173,7 +182,10 @@ class Db
   {
     if (this.use_cache)
     {
+      if (this.write_mem_cache)
+      {
       this.cache[key] = undefined;
+      }
 
       if (this.write_db_cache)
       {
@@ -186,7 +198,10 @@ class Db
   {
     if (this.use_cache)
     {
+      if (this.write_mem_cache)
+      {
       this.cache = [];
+      }
   
       if (this.write_db_cache)
       {
@@ -199,7 +214,6 @@ class Db
 
   Select_Obj(path, on_success_fn)
   {
-    //console.log("Db.Select_Obj: path =", path);
     this.conn.ref(path).once('value').then(Then_OK);
     function Then_OK(query_res)
     {
@@ -237,14 +251,12 @@ class Db
 
   Insert(path, obj, on_success_fn)
   {
-    //console.log("Insert");
     obj.id = this.conn.ref(path).push().key;
     this.conn.ref(path + "/" + obj.id).set(obj, on_success_fn);
   }
 
   Update(path, obj, on_success_fn)
     {
-    //console.log("Update");
     var ref, promise;
 
     try

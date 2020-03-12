@@ -67,10 +67,13 @@ class Util
   {
     var res = true;
 
-    if (obj != null && obj.length == null)
-      res = false;
-    else if (obj != null && obj.length != null && obj.length > 0)
+    if (obj && obj.length && obj.length > 0)
       res = false
+    else if (obj && obj.trim && obj.trim() != "")
+      res = false
+    else if (obj)
+      res = false;
+
     return res;
   }
 
@@ -155,6 +158,18 @@ class Util
     return val;
   }
 
+  static New_Field(obj, field_name, field_val, null_on_empty)
+  {
+    if (!Util.Empty(field_val))
+    {
+      obj[field_name] = field_val;
+    }
+    else if (null_on_empty)
+    {
+      obj[field_name] = null;
+    }
+  }
+
   static To_Int(val)
   {
     var res = val;
@@ -197,11 +212,15 @@ class Util
 
   static Is_Visible(elem)
   {
-    let res = false;
+    let res = true;
 
-    if (elem != null && elem.style.display != null && elem.style.display != "none")
+    if (elem)
     {
-      res = true;
+      const style_display = window.getComputedStyle(elem).display;
+      if (style_display == undefined || style_display == null || style_display == "" || style_display == "none")
+      {
+        res = false;
+      }
     }
 
     return res;

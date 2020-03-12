@@ -119,7 +119,6 @@ class Trend
 
   Insert(db, on_success_fn)
   {
-    //console.log("Trend.Insert: this =", this);
     db.Insert("/trend", this, on_success_fn);
   }
 
@@ -150,6 +149,20 @@ class Trend
     }
 
     return val;
+  }
+
+  static async Select_First(db, query_id)
+  {
+    var vals, res;
+
+    vals = await Trend.Select_By_Query_Id_Async(db, query_id);
+    if (!Util.Empty(vals))
+    {
+      vals = Util.Sort(vals, "datetime");
+      res = vals[0];
+    }
+
+    return res;
   }
 
   static async Select_Last_Val(db, query_id)
