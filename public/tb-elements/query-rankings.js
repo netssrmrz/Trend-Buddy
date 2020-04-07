@@ -6,12 +6,6 @@ export class QueryRankings extends PolymerElement
   {
     return html`
       <style>
-        @font-face
-        {
-          font-family: roboto-light;
-          src: url(fonts/Roboto-Light.ttf);
-        }
-
         :host
         {
           display: inline-block;
@@ -60,10 +54,10 @@ export class QueryRankings extends PolymerElement
       legend:
       {
         position: "none",
-        textStyle: { fontName: "roboto", fontSize: 14, color: "#00ff00" }
+        textStyle: { fontName: "hyperspace-bold", fontSize: 14, color: "#00ff00" }
       },
       animation: { startup: false, duration: 0, easing: 'linear', },
-      fontName: "roboto",
+      fontName: "hyperspace-bold",
       fontSize: 11,
       backgroundColor: "#000000",
       vAxis:

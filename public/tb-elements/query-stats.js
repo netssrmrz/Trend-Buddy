@@ -16,10 +16,12 @@ export class QueryStats extends PolymerElement
         :host
         {
           display: inline-block;
-          width: 250px;
-          height: 180px;
+          xwidth: 250px;
+          xheight: 180px;
           xborder: 1px solid #f00;
           overflow: hidden;
+          margin-bottom: 30px;
+          margin-right: 30px;
         }
 
         paper-spinner-lite
@@ -50,45 +52,51 @@ export class QueryStats extends PolymerElement
         .trend-icon
         {
           padding: 0px;
-          width: 25px;
-          height: 25px;
+          width: 15px;
+          height: 15px;
         }
 
         .val
         {
           display: inline-block;
-          width: 130px;
+          width: 158px;
           text-align: right;
         }
 
         .val_label
         {
-          width: 50px;
+          width: 72px;
           display: inline-block;
           text-align: right;
+        }
+
+        .val_field
+        {
+          font-family: hyperspace-bold;
+          font-size: 13px;
         }
       </style>
 
       <div id="title_elem"></div>
 
       <div id="val_elem"><paper-spinner-lite active></paper-spinner-lite></div> 
-      <div id="d_elem">
-        <span class="val_label">1d:</span> 
+      <div id="d_elem" class="val_field">
+        <span class="val_label">1day:</span> 
         <div class="val">
           <span id="val_d_elem"></span> 
           <span id="val_d_pct_elem"></span>
           <iron-icon id="val_d_icon_elem" icon="" class="trend-icon"></iron-icon>
           </div>
         </div>
-      <div id="month_d_elem">
-        <span class="val_label">1m:</span> 
+      <div id="month_d_elem" class="val_field">
+        <span class="val_label">1month:</span> 
         <div class="val">
           <span id="val_month_d_elem"></span> 
           <span id="val_month_d_pct_elem"></span>
           <iron-icon id="val_month_d_icon_elem" icon="" class="trend-icon"></iron-icon>
           </div>
         </div>
-        <div id="overall_d_elem">
+      <div id="overall_d_elem" class="val_field">
         <span class="val_label">Overall:</span> 
         <div class="val">
           <span id="val_overall_d_elem"></span> 
@@ -96,7 +104,7 @@ export class QueryStats extends PolymerElement
           <iron-icon id="val_overall_d_icon_elem" icon="" class="trend-icon"></iron-icon>
           </div>
         </div>
-        <div id="since_d_elem">
+      <div id="since_d_elem" class="val_field">
         <span class="val_label">Since:</span> 
         <div class="val">
           <span id="val_since_elem"></span> 

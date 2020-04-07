@@ -43,6 +43,30 @@ class Trend
     return val;
   }
 
+  static async Select_Chart_Vals_By_Query_Async(db, query, on_success_fn)
+  {
+    var key, vals, val, c;
+
+    key = "Trend-Select_Chart_Vals_By_Query_" + query.id;
+    vals = await db.Get_From_Cache(key);
+    if (vals.not_in_cache)
+    {
+      vals = await Trend.Calc_Chart_Vals_By_Query_Async(db, query);
+      if (vals)
+      {
+        for (c = 1; c < vals.length; c++)
+        {
+          val = vals[c];
+          val[0] = new Date(val[0]);
+        }
+      }
+
+      await db.Insert_In_Cache(key, vals);
+    }
+
+    return vals
+  }
+
   static Select_Chart_Vals_By_Query(db, query, on_success_fn)
   {
     var key;

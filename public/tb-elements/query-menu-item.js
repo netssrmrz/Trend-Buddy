@@ -7,12 +7,6 @@ export class QueryMenuItem extends PolymerElement
   {
     return html`
       <style>
-        @font-face
-        {
-          font-family: roboto-light;
-          src: url(fonts/Roboto-Light.ttf);
-        }
-
         iron-icon
         {
           color: #616161;
@@ -22,7 +16,7 @@ export class QueryMenuItem extends PolymerElement
     
         a
         {
-          font-family: roboto-light;
+          font-family: hyperspace-bold;
           font-size: 14px;
           display: block;
           padding: 10px 20px 10px 20px;
