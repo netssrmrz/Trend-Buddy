@@ -2,6 +2,7 @@
 
 <head>
   <title>Job Woper</title>
+  <link rel="shortcut icon" type="image/icon" href="/images/favicon/favicon.ico"/>
 
   <script src="https://www.gstatic.com/firebasejs/5.8.0/firebase.js"></script>
   <script src="https://www.gstatic.com/firebasejs/5.8.0/firebase-app.js"></script>
@@ -453,7 +454,9 @@
 
     function Draw_Chart(chart_data, is_relative)
     {
-      var data_table, options, draw_data;
+      var 
+        data_table, options, draw_data, chart_elem,
+        height;
 
       if (is_relative)
         draw_data = To_Relative_Data(chart_data);
@@ -461,9 +464,18 @@
         draw_data = chart_data;
 
       data_table = google.visualization.arrayToDataTable(draw_data);
+
+      chart_elem = document.getElementById("curve_chart");
+      width = chart_elem.clientWidth - 70;
+      height = chart_elem.clientHeight - 70;
+      if (height > width)
+      {
+        height = width;
+      }
+
       options = {
         curveType: 'line',
-        chartArea: { width: "90%", height: "80%" },
+        chartArea: { left: 50, top: 50, width, height },
         legend:
         {
           position: "top",
@@ -494,7 +506,7 @@
           isHtml: true
         }
       };
-      document.getElementById("curve_chart").chart.draw(data_table, options);
+      chart_elem.chart.draw(data_table, options);
     }
 
     function Is_Relative_Chart()

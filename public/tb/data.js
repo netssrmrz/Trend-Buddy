@@ -10,6 +10,7 @@ class Db
       apiKey: "AIzaSyAITTb3Fxh1HiyFxdObmgZ2LqJZm38EQ5k",
       authDomain: "trend-buddy.firebaseapp.com",
       databaseURL: "https://trend-buddy.firebaseio.com",
+      //databaseURL: "https://trend-buddy-dev.firebaseio.com",
       storageBucket: "trend-buddy.appspot.com",
       messagingSenderId: "603649293586"
     };
