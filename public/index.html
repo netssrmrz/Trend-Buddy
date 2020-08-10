@@ -177,6 +177,12 @@
       font-size: 30px;
     }
 
+    #title img
+    {
+      vertical-align: bottom;
+      width: 40px;
+    }
+
     #query_items
     {
       height: 100%;
@@ -731,7 +737,8 @@
       <app-header id="header" slot="header">
         <app-toolbar>
           <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
-          <div id="title" main-title>Job Woper</div>
+          <div id="title" main-title>
+            <img src="images/favicon/apple-touch-icon.png">Job Woper</div>
           <paper-toggle-button id="rel_button">Relative</paper-toggle-button>
         </app-toolbar>
       </app-header>
