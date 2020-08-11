@@ -9,14 +9,22 @@ class Db
     {
       apiKey: "AIzaSyAITTb3Fxh1HiyFxdObmgZ2LqJZm38EQ5k",
       authDomain: "trend-buddy.firebaseapp.com",
-      databaseURL: "https://trend-buddy.firebaseio.com",
-      //databaseURL: "https://trend-buddy-dev.firebaseio.com",
       storageBucket: "trend-buddy.appspot.com",
       messagingSenderId: "603649293586"
     };
-    firebase.initializeApp(config);
-    this.conn = firebase.database();
 
+    config.databaseURL = "https://trend-buddy-dev.firebaseio.com";
+    if (window.location.host == "trend-buddy.web.app" || 
+      window.location.host == "trend-buddy.firebaseapp.com" || 
+      window.location.host == "jobwoper.com.au" || 
+      window.location.host == "www.jobwoper.com.au")
+    {
+      config.databaseURL = "https://trend-buddy.firebaseio.com";
+    }
+
+    firebase.initializeApp(config);
+    
+    this.conn = firebase.database();
     this.use_cache = true;
     this.read_mem_cache = true;
     this.write_mem_cache = true;
