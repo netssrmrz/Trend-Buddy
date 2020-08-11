@@ -7,11 +7,11 @@ export class QueryMenuItem extends PolymerElement
   {
     return html`
       <style>
-        iron-icon
+        .menu_icon
         {
-          color: #616161;
-          margin-right: 20px;
-          vertical-align: text-bottom;
+          margin: 0px -10px 0px -10px;
+          padding: 0px;
+          xborder: 1px solid #f00;
         }
     
         a
@@ -42,6 +42,13 @@ export class QueryMenuItem extends PolymerElement
           padding-left: 15px;
         }
 
+        paper-icon-button iron-icon
+        {
+          color: #616161;
+          margin-right: 20px;
+          vertical-align: text-bottom;
+        }
+
         paper-icon-button
         {
           float: right;
@@ -52,7 +59,11 @@ export class QueryMenuItem extends PolymerElement
         }
       </style>
 
-      <a id="item"><span id="title"></span></a>
+      <a id="item">
+        <iron-icon id="open_icon" icon="arrow-drop-down" class="menu_icon" hidden></iron-icon>
+        <iron-icon id="close_icon" icon="arrow-drop-up" class="menu_icon" hidden></iron-icon>
+        <span id="title"></span>
+      </a>
     `;
   }
 
@@ -125,6 +136,7 @@ export class QueryMenuItem extends PolymerElement
       stats_elem.icon = "trending-up";
       stats_elem.onclick = this.On_Choose_Trend.bind(this);
       this.$.item.append(stats_elem);
+      this.$.open_icon.hidden = false;
     }
 
     const list_elem = document.createElement("iron-collapse");
@@ -152,6 +164,16 @@ export class QueryMenuItem extends PolymerElement
   On_Toggle_Menu(event)
   {
     this.$.list_elem.toggle();
+    if (this.$.list_elem.opened)
+    {
+      this.$.open_icon.hidden = true;
+      this.$.close_icon.hidden = false;
+    }
+    else
+    {
+      this.$.open_icon.hidden = false;
+      this.$.close_icon.hidden = true;
+    }
   }
 
   Uncheck()
