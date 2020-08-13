@@ -9,7 +9,7 @@ export class QueryMenuItem extends PolymerElement
       <style>
         .menu_icon
         {
-          margin: 0px -10px 0px -10px;
+          margin: -10px -10px -10px -10px;
           padding: 0px;
           xborder: 1px solid #f00;
         }
