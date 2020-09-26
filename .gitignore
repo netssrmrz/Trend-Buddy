@@ -1,6 +1,3 @@
-/functions/node_modules
-/public/.vs
-
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
@@ -49,10 +46,11 @@ $RECYCLE.BIN/
 .firebase
 Network Trash Folder
 Temporary Items
-/.vs
-/package-lock.json
-public/.vs/public/v15/.suo
-public/.vs/public
-/functions/trend-buddy-firebase-adminsdk-ymhg3-c65d28fe1d.json
-/functions/package-lock.json
-/functions/node_modules
+.vs
+package-lock.json
+
+public/.vs/
+
+functions/trend-buddy-firebase-adminsdk-ymhg3-c65d28fe1d.json
+functions/package-lock.json
+functions/node_modules/
