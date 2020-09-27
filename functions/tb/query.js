@@ -203,18 +203,20 @@ class Query
     var c, query;
 
     const queries = await Query.Select_Objs(db);
+    console.log("Query.Insert_Trends_Async: "+queries.length+" queries to process");
     for (c = 0; c < queries.length; c++)
     {
       query = queries[c];
+      console.log("Query.Insert_Trends_Async: query = "+JSON.stringify(query));
       if (!Util.Empty(query.terms))
       {
         const trend_info = await Query.Insert_Trend_Async(db, query);
-        console.log("Query.Insert_Trends: Query \""+query.title+"\" updated with new value \""+
+        console.log("Query.Insert_Trends_Async: Query \""+query.title+"\" updated with new value \""+
           trend_info.trend.count+"\" for a total of "+trend_info.vals.length+" values");
       }
       else
       {
-        console.log("Query.Insert_Trends: Query \""+query.title+"\" skipped due to missing query string");
+        console.log("Query.Insert_Trends_Async: Query \""+query.title+"\" skipped due to missing query string");
       }
     }
   }

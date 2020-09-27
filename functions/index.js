@@ -19,7 +19,7 @@ async function Update_All_Trends_Request(req, res)
   res.end();
 }
 
-const runtimeOpts = {timeoutSeconds: 180};
+const runtimeOpts = {timeoutSeconds: 540};
 exports.updateAllTrendsScheduled = 
   functions.runWith(runtimeOpts).pubsub.schedule('every day 11:30').timeZone("Australia/Sydney").onRun(Update_All_Trends);
 exports.updateAllTrends = functions.runWith(runtimeOpts).https.onRequest(Update_All_Trends_Request);

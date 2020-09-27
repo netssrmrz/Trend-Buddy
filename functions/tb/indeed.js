@@ -16,7 +16,8 @@ class Indeed
       "useragent=Mozilla/%2F4.0%28Firefox%29&" +
       "v=2&" +
       "format=json";
-    Util.Req_Json("trend-buddy.appspot.com", 80, path, Req_Json_OK);
+    //Util.Req_Json("trend-buddy.appspot.com", 80, path, Req_Json_OK);
+    Util.Req_Json("api.indeed.com", 80, path, Req_Json_OK);
     function Req_Json_OK(res)
     {
       var count = 0;
@@ -33,7 +34,8 @@ class Indeed
     //console.log("Indeed.Get_Job_Count_Async: query =", query);
     let count = 0;
     const url =
-      "http://trend-buddy.appspot.com/ads/apisearch?" +
+      //"http://trend-buddy.appspot.com/ads/apisearch?" +
+      "http://api.indeed.com/ads/apisearch?" +
       "publisher=6433637473123845&" +
       "q=" + encodeURIComponent(query) + "&" +
       "limit=0&" +

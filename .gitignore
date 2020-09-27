@@ -25,10 +25,10 @@ Network Trash Folder
 Temporary Items
 .vs
 package-lock.json
-
+node_modules/
 public/.vs/
 
-functions
-#functions/trend-buddy-firebase-adminsdk-ymhg3-c65d28fe1d.json
-#functions/package-lock.json
+functions/node_modules/
+functions/trend-buddy-firebase-adminsdk-ymhg3-c65d28fe1d.json
+functions/package-lock.json
 
