@@ -1,45 +1,22 @@
-# Windows image file caches
 Thumbs.db
 ehthumbs.db
-
-# Folder config file
 Desktop.ini
-
-# Recycle Bin used on file shares
 $RECYCLE.BIN/
-
-# Windows Installer files
 *.cab
 *.msi
 *.msm
 *.msp
-
-# Windows shortcuts
 *.lnk
-
-# =========================
-# Operating System Files
-# =========================
-
-# OSX
-# =========================
-
 .DS_Store
 .AppleDouble
 .LSOverride
-
-# Thumbnails
 ._*
-
-# Files that might appear in the root of a volume
 .DocumentRevisions-V100
 .fseventsd
 .Spotlight-V100
 .TemporaryItems
 .Trashes
 .VolumeIcon.icns
-
-# Directories potentially created on remote AFP share
 .AppleDB
 .AppleDesktop
 .apdisk
@@ -51,6 +28,7 @@ package-lock.json
 
 public/.vs/
 
-functions/trend-buddy-firebase-adminsdk-ymhg3-c65d28fe1d.json
-functions/package-lock.json
-functions/node_modules/
+functions
+#functions/trend-buddy-firebase-adminsdk-ymhg3-c65d28fe1d.json
+#functions/package-lock.json
+
