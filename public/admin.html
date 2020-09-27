@@ -1,7 +1,7 @@
 <html>
 
 <head>
-  <title>Trend Buddy</title>
+  <title>Job Woper - Administration</title>
 
   <script src="https://www.gstatic.com/firebasejs/5.8.0/firebase.js"></script>
   <script src="https://www.gstatic.com/firebasejs/5.8.0/firebase-app.js"></script>
@@ -123,6 +123,7 @@
       document.getElementById("new_option").onclick = On_New_Query;
       //document.getElementById("upd_option").onclick = On_Update_All;
       document.getElementById("idx_option").onclick = On_Refresh_Cache;
+      document.getElementById("cln_option").onclick = On_Clean_Db;
 
       document.getElementById("qry_edt").on_save_fn = On_Save_Query;
       document.getElementById("qry_edt").on_clr_data_fn = On_Clear_Data;
@@ -137,13 +138,30 @@
         console.log("user.id: " + user.uid);
     }
 
+    async function On_Clean_Db()
+    {
+      let c, msg_text, zero_count = 0;
+      const trend_entries = await Trend.Select_Objs(db);
+      const msg_elem = document.getElementById("msg");
+
+      for (c = 0; c < trend_entries.length; c++)
+      {
+        const trend_entry = trend_entries[c];
+        if (trend_entry.count == 0)
+        {
+          zero_count++;
+          db.conn.ref("/trend/" + trend_entry.id).remove();
+        }
+      }
+
+      msg_text = zero_count + " entries with no data removed";
+      msg_elem.text = msg_text;
+      msg_elem.show();
+    }
+
     async function On_Refresh_Cache()
     {
-      db.read_mem_cache = false;
-      db.write_mem_cache = false;
-      db.read_db_cache = false;
-      db.write_db_cache = true;
-      
+      await db.conn.ref("/cache").remove();
       await Refresh_Query_Cache();
       await Refresh_Trend_Cache();
 
@@ -161,19 +179,25 @@
     async function Refresh_Trend_Cache()
     {
       // Trend-Select_By_Query_Id_-KpPWAFGBhe6CxLYn22r
-      // Trend-Select_Chart_Vals_By_Query_-KpPWAFGBhe6CxLYn22r
       const queries = await Query.Select_Objs(db);
-      var c, key;
+      var c, key, msg_text;
 
       for (c = 0; c < queries.length; c++)
       {
         var query = queries[c];
-        key = "Select_Chart_Vals_By_Query_Id_" + queries[c].id;
-        await db.Delete_From_Cache(key);
-        Trend.Select_Chart_Vals_By_Query(db, query, Select_OK);
-        function Select_OK(values)
+        if (!Util.Empty(query.terms))
         {
-          document.getElementById("msg").text = "Query \"" + query.title + "\" completed.";
+          //Trend.Select_Chart_Vals_By_Query(db, query, Select_OK);
+          const values = await Trend.Select_Chart_Vals_By_Query_Async(db, query);
+          if (values && values.length)
+          {
+            msg_text = "Query \"" + query.title + "\" completed (" + values.length + " entries).";
+          }
+          else
+          {
+            msg_text = "Query \"" + query.title + "\" completed.";
+          }
+          document.getElementById("msg").text = msg_text;
           document.getElementById("msg").show();
         }
       }
@@ -301,6 +325,7 @@
         <a id="new_option">New Query</a>
         <a id="upd_option">Update All</a>
         <a id="idx_option">Refresh Cache</a>
+        <a id="cln_option">Clean Database</a>
         <div id="query_items" class="menu_items"></div>
       </div>
     </app-drawer>
@@ -309,7 +334,7 @@
       <app-header id="header" slot="header">
         <app-toolbar>
           <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
-          <div main-title>Trend Buddy</div>
+          <div main-title>Job Woper - Administration</div>
         </app-toolbar>
       </app-header>
 

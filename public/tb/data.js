@@ -14,6 +14,7 @@ class Db
     };
 
     config.databaseURL = "https://trend-buddy-dev.firebaseio.com";
+    //config.databaseURL = "https://trend-buddy.firebaseio.com";
     if (window.location.host == "trend-buddy.web.app" || 
       window.location.host == "trend-buddy.firebaseapp.com" || 
       window.location.host == "jobwoper.com.au" || 

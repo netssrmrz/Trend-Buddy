@@ -14,6 +14,11 @@ class Trend
     db.Select_Obj("/trend/" + id, on_success_fn);
   }
 
+  static Select_Objs(db)
+  {
+    return db.Select_Objs_Async("/trend");
+  }
+
   static Select_By_Query_Id(db, query_id, on_success_fn)
   {
     db.conn.ref("/trend").orderByChild("query_id").equalTo(query_id).once("value", OK_Fn);
