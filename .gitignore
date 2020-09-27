@@ -31,4 +31,4 @@ public/.vs/
 functions/node_modules/
 functions/trend-buddy-firebase-adminsdk-ymhg3-c65d28fe1d.json
 functions/package-lock.json
-
+functions/ui-debug.log
