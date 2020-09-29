@@ -226,6 +226,11 @@
       background-color: #00aa00;
     }
 
+    #intro_div
+    {
+      font-size: 13px;
+    }
+
     #curve_chart
     {
       height: 90%;
@@ -313,7 +318,7 @@
     // Events =====================================================================================
 
     window.onload = Main;
-    function Main()
+    async function Main()
     {
       var toggle_elem, menu_elem, view_chart_elem;
 
@@ -336,10 +341,15 @@
       view_chart_elem = document.getElementById("view_chart_button");
       view_chart_elem.onclick = On_View_Chart_Click;
       view_chart_elem.disabled = true;
+
+      const query = await Query.Select_By_Title(db, "Operating System");
+      const child_queries = await Query.Select_Child_Objs(db, query.id);
+      Show_Trend(query, child_queries);
     }
 
     function On_View_Chart_Click()
     {
+      Util.Hide(intro_div);
       Util.Hide(stats_elem);
       Util.Show(curve_chart);
       view_chart_button.disabled = true;
@@ -348,42 +358,15 @@
     function On_Choose_Trend(event)
     {
       event.stopPropagation();
-      Util.Clr(stats_elem);
-
-      // add rankings
-      const rank_elem = document.createElement("query-rankings");
-      rank_elem.db = db;
-      rank_elem.query = this.query;
-      rank_elem.child_queries = this.child_queries;
-      stats_elem.append(rank_elem);
-
-      // add pie chart
-      const weight_elem = document.createElement("query-weights");
-      weight_elem.db = db;
-      weight_elem.query = this.query;
-      weight_elem.child_queries = this.child_queries;
-      stats_elem.append(weight_elem);
-
-      stats_elem.append(document.createElement("br"));
-
-      // add movement panels for each tech
-      for (c=0; c<this.child_queries.length; c++)
-      {
-        const stat_elem = document.createElement("query-stats");
-        stat_elem.db = db;
-        stat_elem.query = this.child_queries[c];
-
-        stats_elem.append(stat_elem);
-      }
-
-      Util.Hide(curve_chart);
-      Util.Show(stats_elem);
-      view_chart_button.disabled = false;
-  }
+      Util.Hide(intro_div);
+      Show_Trend(this.query, this.child_queries);
+    }
 
     function On_Choose_Chart(event)
     {
       event.stopPropagation();
+      Util.Hide(intro_div);
+
       if (this.checked)
       {
         Draw_Chart_By_Query_Id(db, this.query.id, false, Is_Relative_Chart());
@@ -407,6 +390,7 @@
 
     function On_Show_Chart(event)
     {
+      Util.Hide(intro_div);
       Set_Absolute_Chart();
       query_menu.Uncheck();
       this.querySelector("#checkbox").checked = true;
@@ -428,6 +412,41 @@
     }
 
     // UI =========================================================================================
+
+    function Show_Trend(query, child_queries)
+    {
+      Util.Clr(stats_elem);
+
+      // add rankings
+      const rank_elem = document.createElement("query-rankings");
+      rank_elem.db = db;
+      rank_elem.query = query;
+      rank_elem.child_queries = child_queries;
+      stats_elem.append(rank_elem);
+
+      // add pie chart
+      const weight_elem = document.createElement("query-weights");
+      weight_elem.db = db;
+      weight_elem.query = query;
+      weight_elem.child_queries = child_queries;
+      stats_elem.append(weight_elem);
+
+      stats_elem.append(document.createElement("br"));
+
+      // add movement panels for each tech
+      for (c=0; c<child_queries.length; c++)
+      {
+        const stat_elem = document.createElement("query-stats");
+        stat_elem.db = db;
+        stat_elem.query = child_queries[c];
+
+        stats_elem.append(stat_elem);
+      }
+
+      Util.Hide(curve_chart);
+      Util.Show(stats_elem);
+      view_chart_button.disabled = false;
+    }
 
     function Init_Chart()
     {
@@ -777,29 +796,32 @@
         </app-toolbar>
       </app-header>
 
-      <div id="curve_chart">
+      <div id="intro_div">
         <p>Every day, Job Woper takes note of the number of jobs posted demanding experience with various technologies.
-        This, in turn, is used to generate comparative charts. 
-        If, like me, you're an IT professional you might find this information helpful when determining which skills are worth pursuing. 
-        Each chart, individually, is not overly useful but when combined with others can give us some insight into which technologies are in demand and which are on the way out.</p>
-        
-        <ul id="man_items">
-          <li>To view job requests for a single tech just click on the appropriate tech title.</li>
-          <li>To compare several tech charts use the checkboxes.</li>
-          <li>To compare several techs in a relative way so that each tech point no longer represents the
-            exact number of jobs found but rather, the percentage of jobs out of the total for all the included
-            techs, use the "Relative" switch on the top-right of the page.</li>
-          <li>To view techs in a Tech category click on a title marked by an "up chart" icon.</li>
-          <li>To view a stats summary for a tech category click on the "up chart" icon directly.</li>
-          </ul>
+          This, in turn, is used to generate comparative charts. 
+          If, like me, you're an IT professional you might find this information helpful when determining which skills are worth pursuing. 
+          Each chart, individually, is not overly useful but when combined with others can give us some insight into which technologies are in demand and which are on the way out.</p>
+          
+          <ul id="man_items">
+            <li>To view job requests for a single tech just click on the appropriate tech title.</li>
+            <li>To compare several tech charts use the checkboxes.</li>
+            <li>To compare several techs in a relative way so that each tech point no longer represents the
+              exact number of jobs found but rather, the percentage of jobs out of the total for all the included
+              techs, use the "Relative" switch on the top-right of the page.</li>
+            <li>To view techs in a Tech category click on a title marked by an "up chart" icon.</li>
+            <li>To view a stats summary for a tech category click on the "up chart" icon directly.</li>
+            </ul>
+  
+          <p>Also, Job Woper has been designed for Chrome only.</p>
+  
+          <p>Tech used to build this site includes VS Code, Eclipse, Javascript, Polymer, Firebase, Google App Engine, Node, and Java.</p>
+  
+          <p id="signature">- <a href="https://www.linkedin.com/in/esteban-ramirez-91a66b14/">Esteban (Steven) Ramirez</a>
+          <a href="https://www.linkedin.com/in/esteban-ramirez-91a66b14" target="_blank"><img src="/images/In-2C-14px.png" /></a>
+          <a href="http://ramirezsystems.blogspot.com" target="_blank"><img id="blogger" src="/images/icons8-blogger-18.png" /></a></p>
+        </div>
 
-        <p>Also, Job Woper has been designed for Chrome only.</p>
-
-        <p>Tech used to build this site includes VS Code, Eclipse, Javascript, Polymer, Firebase, Google App Engine, Node, and Java.</p>
-
-        <p id="signature">- <a href="https://www.linkedin.com/in/esteban-ramirez-91a66b14/">Esteban (Steven) Ramirez</a>
-        <a href="https://www.linkedin.com/in/esteban-ramirez-91a66b14" target="_blank"><img src="/images/In-2C-14px.png" /></a>
-        <a href="http://ramirezsystems.blogspot.com" target="_blank"><img id="blogger" src="/images/icons8-blogger-18.png" /></a></p>
+      <div id="curve_chart">
       </div>
 
       <div id="stats_elem">

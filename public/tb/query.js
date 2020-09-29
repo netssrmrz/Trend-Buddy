@@ -68,6 +68,27 @@ class Query
     db.Select_Obj("/query/" + id, on_success_fn);
   }
 
+  static Select_Obj_Async(db, id)
+  {
+    return db.Select_Obj_Async("/query/" + id);
+  }
+
+  static async Select_By_Title(db, title)
+  {
+    let res;
+    
+    let ref = db.conn.ref("query");
+    ref = ref.orderByChild("title");
+    ref = ref.equalTo(title);
+    ref = ref.limitToFirst(1);
+    const query_res = await ref.once('value');
+    const vals = Db.To_Array(query_res);
+    if (vals && vals.length>0)
+      res = vals[0];
+
+    return res;
+  }
+
   Insert(db, on_success_fn)
   {
     db.Insert("/query", this, on_success_fn);

@@ -233,6 +233,14 @@ class Db
     }
   }
 
+  async Select_Obj_Async(path)
+  {
+    const query_res = await this.conn.ref(path).once('value');
+    const vals = Db.To_Obj(query_res);
+      
+    return vals;
+  }
+
   Select_Objs(path, on_success_fn, order_by)
   {
     var ref;
