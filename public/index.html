@@ -304,6 +304,11 @@
       height: 100%;
     }
 
+    html
+    {
+      --app-drawer-width: 300px;
+    }
+
     #stats_elem
     {
       display: none;
@@ -782,7 +787,7 @@
 
   <app-drawer-layout>
 
-    <app-drawer id="menu_drawer" slot="drawer">
+    <app-drawer id="menu_drawer" slot="drawer" width="300">
       <div id="menu_items"></div>
     </app-drawer>
 
@@ -812,7 +817,7 @@
             <li>To view a stats summary for a tech category click on the "up chart" icon directly.</li>
             </ul>
   
-          <p>Also, Job Woper has been designed for Chrome only.</p>
+          <p>Also, Job Woper currently only supports desktop Chrome.</p>
   
           <p>Tech used to build this site includes VS Code, Eclipse, Javascript, Polymer, Firebase, Google App Engine, Node, and Java.</p>
   
