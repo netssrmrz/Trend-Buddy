@@ -27,6 +27,7 @@ class Indeed
 
   static async Get_Job_Count_Async(query)
   {
+    //console.log("Indeed.Get_Job_Count_Async: query =", query);
     let count = 0;
     const url =
       "http://trend-buddy.appspot.com/ads/apisearch?" +
