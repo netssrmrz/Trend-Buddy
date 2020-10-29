@@ -5,6 +5,7 @@ class Db
 {
   constructor()
   {
+    console.log("Db.constructor(): version = 3");
     const config = Db.Get_Config();
     firebase.initializeApp(config);
     this.conn = firebase.database();
@@ -21,9 +22,9 @@ class Db
 
   static Get_Config()
   {
-    let config = null;
+    let config = {};
 
-    if (Db.Is_Dev())
+    if (!Db.Is_Prod())
     {
       const serviceAccount = require('C:\\projects\\Trend-Buddy\\functions\\trend-buddy-firebase-adminsdk-ymhg3-c65d28fe1d.json');
       config =
@@ -40,9 +41,19 @@ class Db
     return config;
   }
 
-  static Is_Dev()
+  static Is_Prod()
   {
-    return functions.config().firebase == undefined;
+    let res = false;
+    const config = functions.config();
+    console.log("Db.Is_Prod(): config =", config);
+
+    if (config && config.env && config.env.type && config.env.type == "prod")
+    {
+      res = true;
+    }
+    console.log("Db.Is_Prod(): res =", res);
+
+    return res;
   }
 
   Exists_In_Cache2(key, on_success_fn)
