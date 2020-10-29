@@ -27,6 +27,21 @@ class Util
   {
     //console.log("Util.Req_Json_Async: url = "+url);
     let res = null;
+
+    const response_text = await Util.Req_Text(url);
+    if (response_text)
+    {
+      res = JSON.parse(response_text);
+    }
+
+    return res;
+
+  }
+
+  static async Req_Text(url)
+  {
+    //console.log("Util.Req_Json_Async: url = "+url);
+    let res = null;
     const options = {
       method: 'get',
     };
@@ -35,8 +50,7 @@ class Util
     const response = await request;
     if (response.ok)
     {
-      const response_text = await response.text();
-      res = JSON.parse(response_text);
+      res = await response.text();
     }
 
     return res;

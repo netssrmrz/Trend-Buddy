@@ -1,19 +1,14 @@
 ﻿const functions = require('firebase-functions');
 const firebase = require('firebase-admin');
-//const serviceAccount = require('C:\\projects\\Trend-Buddy\\functions\\trend-buddy-firebase-adminsdk-ymhg3-c65d28fe1d.json');
 
 class Db
 {
   constructor()
   {
-    /*const config =
-    {
-      credential: firebase.credential.cert(serviceAccount),
-      databaseURL: "https://trend-buddy.firebaseio.com",
-    };
-    firebase.initializeApp(config);*/
-    firebase.initializeApp(functions.config().firebase);
+    const config = Db.Get_Config();
+    firebase.initializeApp(config);
     this.conn = firebase.database();
+    console.log("Db.constructor(): db host =", this.conn.repo_.repoInfo_.host);
 
     this.use_cache = true;
     this.read_mem_cache = true;
@@ -22,6 +17,32 @@ class Db
     this.write_db_cache = true;
     this.cache = [];
     this.trace_hits = false;
+  }
+
+  static Get_Config()
+  {
+    let config = null;
+
+    if (Db.Is_Dev())
+    {
+      const serviceAccount = require('C:\\projects\\Trend-Buddy\\functions\\trend-buddy-firebase-adminsdk-ymhg3-c65d28fe1d.json');
+      config =
+      {
+        credential: firebase.credential.cert(serviceAccount),
+        databaseURL: "https://trend-buddy-dev.firebaseio.com",
+      };
+    }
+    else
+    {
+      config = functions.config().firebase;
+    }
+
+    return config;
+  }
+
+  static Is_Dev()
+  {
+    return functions.config().firebase == undefined;
   }
 
   Exists_In_Cache2(key, on_success_fn)
@@ -259,6 +280,7 @@ class Db
 
   Insert(path, obj, on_success_fn)
   {
+    console.log("Db.Insert(): path, obj =", path, obj);
     obj.id = this.conn.ref(path).push().key;
     this.conn.ref(path + "/" + obj.id).set(obj, on_success_fn);
   }

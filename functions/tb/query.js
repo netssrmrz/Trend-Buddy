@@ -175,19 +175,25 @@ class Query
 
   static async Insert_Trend_Async(db, query)
   {
-    const count = await Indeed.Get_Job_Count_Async(query.terms);
+    let res = null;
 
-    const trend = new Trend();
-    trend.query_id = query.id;
-    trend.datetime = Date.now();
-    trend.count = count;
-    await trend.Insert_Async(db);
+    //const count = await Indeed.Get_Job_Count_Async(query.terms);
+    const count = await Indeed.Get_Job_Count_By_Scrape(query.terms);
+    if (count)
+    {
+      const trend = new Trend();
+      trend.query_id = query.id;
+      trend.datetime = Date.now();
+      trend.count = count;
+      await trend.Insert_Async(db);
+  
+      const vals = await Trend.Calc_Chart_Vals_By_Query_Async(db, query);
+      const key = "Trend-Select_Chart_Vals_By_Query_" + query.id;
+      await db.Insert_In_Cache(key, vals);
+      res = {trend, vals};
+    }
 
-    const vals = await Trend.Calc_Chart_Vals_By_Query_Async(db, query);
-    const key = "Trend-Select_Chart_Vals_By_Query_" + query.id;
-    await db.Insert_In_Cache(key, vals);
-
-    return {trend, vals};
+    return res;
   }
 
   static Insert_Trends(db, on_success_fn)
@@ -232,8 +238,11 @@ class Query
       if (!Util.Empty(query.terms))
       {
         const trend_info = await Query.Insert_Trend_Async(db, query);
-        console.log("Query.Insert_Trends_Async: Query \""+query.title+"\" updated with new value \""+
+        if (trend_info)
+        {
+          console.log("Query.Insert_Trends_Async: Query \""+query.title+"\" updated with new value \""+
           trend_info.trend.count+"\" for a total of "+trend_info.vals.length+" values");
+        }
       }
       else
       {
